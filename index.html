@@ -11,193 +11,220 @@
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
 :root{
-  --bg:#070c14; --panel:#0d1624; --panel2:#111d2f; --line:#1d2d44;
-  --ink:#d8e6f5; --dim:#7f93ad; --accent:#46d9ff; --accent2:#ffb547;
-  --ok:#5be39b; --bad:#ff6b6b;
-  --mono:'JetBrains Mono',ui-monospace,Menlo,monospace;
-  --sans:'Inter',-apple-system,system-ui,sans-serif;
+  --bg:#06101c; --panel:rgba(8,18,32,.9); --panel2:#0f1d31; --line:#1d3554;
+  --ink:#d8e6f5; --dim:#7f93ad; --accent:#46d9ff; --accent2:#ffb547; --ok:#5be39b; --bad:#ff6b6b;
+  --mono:'JetBrains Mono',ui-monospace,Menlo,monospace; --sans:'Inter',-apple-system,system-ui,sans-serif;
+  --pw:400px;
 }
 *{box-sizing:border-box}
-html,body{margin:0;height:100%}
-body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:14px;
-  background-image:linear-gradient(var(--line) 1px,transparent 1px),linear-gradient(90deg,var(--line) 1px,transparent 1px);
-  background-size:40px 40px;background-position:-1px -1px;}
-body::before{content:"";position:fixed;inset:0;background:radial-gradient(ellipse at 50% 0%,rgba(70,217,255,.08),transparent 60%),rgba(7,12,20,.86);pointer-events:none}
-.app{position:relative;display:grid;grid-template-rows:auto 1fr;height:100vh}
+html,body{margin:0;height:100%;overflow:hidden;background:var(--bg);color:var(--ink);font:14px/1.45 var(--sans)}
 button,input,textarea,select{font:inherit;color:inherit}
 button{cursor:pointer;background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:6px 10px;transition:.15s}
 button:hover{border-color:var(--accent);color:var(--accent)}
 button.on{background:rgba(70,217,255,.12);border-color:var(--accent);color:var(--accent)}
-input,textarea{background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:7px 9px;width:100%}
-input:focus,textarea:focus{outline:none;border-color:var(--accent)}
+input,textarea,select{background:#050d18;border:1px solid var(--line);border-radius:8px;padding:7px 9px;width:100%}
+input:focus,textarea:focus,select:focus{outline:none;border-color:var(--accent)}
+code{font-family:var(--mono);font-size:12px;color:var(--accent2)}
+
+#scene{position:fixed;inset:0;width:100%;height:100%;display:block;touch-action:none;cursor:grab}
+#scene.pointer{cursor:pointer}
+body.lite #scene{display:none}
+
+/* lite grid */
+.lite-grid{display:none;position:fixed;inset:0;padding:90px 20px 110px;overflow:auto;
+  background-color:var(--bg);
+  background-image:linear-gradient(var(--line) 1px,transparent 1px),linear-gradient(90deg,var(--line) 1px,transparent 1px);background-size:40px 40px;
+  grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:14px;align-content:center;max-width:900px;margin:0 auto}
+body.lite .lite-grid{display:grid}
+.station{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px;text-align:left;display:flex;flex-direction:column;gap:6px}
+.station b{font-family:var(--mono);letter-spacing:.12em;color:var(--accent);font-weight:600}
+.station span{color:var(--dim);font-size:12px}
 
 /* header */
-header{display:flex;align-items:center;gap:12px;padding:10px 16px;border-bottom:1px solid var(--line);background:rgba(13,22,36,.85);backdrop-filter:blur(6px);flex-wrap:wrap}
+header{position:fixed;top:0;left:0;right:0;display:flex;align-items:center;gap:10px;padding:12px 16px;z-index:5;flex-wrap:wrap;
+  background:linear-gradient(rgba(6,16,28,.95),rgba(6,16,28,0));pointer-events:none}
+header>*{pointer-events:auto}
 .brand{display:flex;align-items:center;gap:10px;font-family:var(--mono);letter-spacing:.2em;font-weight:600}
+.brand small{color:var(--dim);letter-spacing:.1em;font-weight:400;font-size:11px}
 .core{width:26px;height:26px;border-radius:50%;border:2px solid var(--accent);display:grid;place-items:center;box-shadow:0 0 12px rgba(70,217,255,.5)}
 .core::after{content:"";width:8px;height:8px;border-radius:50%;background:var(--accent)}
-.core.live{animation:pulse 1.4s infinite}
-@keyframes pulse{50%{box-shadow:0 0 22px rgba(70,217,255,.9)}}
-.brand small{color:var(--dim);letter-spacing:.1em;font-weight:400;font-size:11px}
-.spacer{flex:1}
-.clock{font-family:var(--mono);font-size:18px;color:var(--accent)}
-.date{font-size:12px;color:var(--dim)}
-.persona{display:flex;border:1px solid var(--line);border-radius:8px;overflow:hidden}
-.persona button{border:0;border-radius:0}
+.core.live{animation:pulse 1.2s infinite}
+@keyframes pulse{50%{box-shadow:0 0 24px rgba(70,217,255,.95)}}
+.spacer{flex:1;pointer-events:none}
+.chip-o{display:flex;align-items:center;gap:7px;font:11px var(--mono);letter-spacing:.12em;color:var(--dim);border:1px solid var(--line);border-radius:999px;padding:5px 11px;background:rgba(8,18,32,.75)}
+.chip-o i{width:7px;height:7px;border-radius:50%;background:#45566b}
+.chip-o.on i{background:var(--ok);box-shadow:0 0 8px var(--ok)}
+.chip-o.busy i{background:var(--accent2);box-shadow:0 0 8px var(--accent2)}
+.persona{display:flex;border:1px solid var(--line);border-radius:8px;overflow:hidden;background:rgba(8,18,32,.75)}
+.persona button{border:0;border-radius:0;background:transparent}
+.persona button.on{background:rgba(70,217,255,.14)}
+.clock{font-family:var(--mono);font-size:18px;color:var(--accent);text-align:right}
+.date{font-size:11px;color:var(--dim);text-align:right}
+.hint-top{position:fixed;top:62px;left:16px;z-index:4;font:10px var(--mono);letter-spacing:.14em;color:var(--dim);pointer-events:none}
 
-/* layout */
-main{display:grid;grid-template-columns:230px 1fr 290px;gap:12px;padding:12px;min-height:0}
-.panel{background:rgba(13,22,36,.92);border:1px solid var(--line);border-radius:12px;display:flex;flex-direction:column;min-height:0}
-.ph{display:flex;align-items:center;justify-content:space-between;padding:10px 12px;border-bottom:1px solid var(--line);font-family:var(--mono);font-size:11px;letter-spacing:.15em;color:var(--dim);text-transform:uppercase}
-.pb{padding:12px;overflow:auto;min-height:0}
-.side{display:flex;flex-direction:column;gap:12px;min-height:0}
+/* tooltip */
+.tip{position:fixed;z-index:8;pointer-events:none;font:11px var(--mono);letter-spacing:.12em;color:var(--accent2);background:var(--panel);border:1px solid var(--accent2);border-radius:6px;padding:4px 8px;display:none}
+.tip.show{display:block}
+
+/* command bar + subtitle */
+.cmdbar{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);width:min(720px,calc(100% - 24px));display:flex;gap:8px;padding:8px;
+  background:var(--panel);border:1px solid var(--line);border-radius:14px;z-index:7;backdrop-filter:blur(8px)}
+.cmdbar input{border:0;background:transparent;font-family:var(--mono);font-size:13px}
+.cmdbar button{flex:none}
+#micBtn.on{animation:pulse 1.4s infinite}
+.subtitle{position:fixed;bottom:80px;left:50%;transform:translateX(-50%);width:max-content;max-width:min(720px,calc(100% - 24px));z-index:6;
+  font:13px/1.5 var(--mono);padding:8px 14px;border-radius:10px;background:rgba(6,16,28,.85);border:1px solid var(--line);
+  opacity:0;transition:opacity .4s;pointer-events:none;max-height:30vh;overflow:hidden}
+.subtitle.show{opacity:1}
+.subtitle b{color:var(--accent2);font-weight:400}
+@media (min-width:901px){ body.panel-open .subtitle{left:calc((100% - var(--pw) - 24px)/2)} }
+
+/* side panel */
+.panel{position:fixed;top:64px;right:12px;bottom:84px;width:var(--pw);z-index:6;display:flex;flex-direction:column;
+  background:var(--panel);border:1px solid var(--accent);border-radius:14px;backdrop-filter:blur(10px);
+  transform:translateX(calc(100% + 30px));transition:transform .35s ease;box-shadow:0 0 40px rgba(70,217,255,.12)}
+.panel.show{transform:none}
+.ph{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;border-bottom:1px solid var(--line);font:12px var(--mono);letter-spacing:.18em;color:var(--accent);text-transform:uppercase}
+.ph button{padding:2px 8px}
+.pb{padding:14px;overflow:auto;flex:1;min-height:0;display:flex;flex-direction:column;gap:10px}
+.hint{color:var(--dim);font-size:12px;line-height:1.5;margin:0}
+.row{display:flex;gap:8px;align-items:center}
+.wide{width:100%}
 
 /* apps */
 .apps{display:flex;flex-direction:column;gap:6px}
-.tile{display:flex;align-items:center;gap:10px;padding:8px;border:1px solid var(--line);border-radius:10px;background:var(--panel2);cursor:pointer;position:relative}
-.tile:hover,.tile.active{border-color:var(--accent)}
-.tile .ic{width:30px;height:30px;border-radius:8px;display:grid;place-items:center;font-family:var(--mono);font-weight:600;background:rgba(70,217,255,.12);color:var(--accent);flex:none}
+.tile{display:flex;align-items:center;gap:10px;padding:8px;border:1px solid var(--line);border-radius:10px;background:var(--panel2);cursor:pointer}
+.tile:hover{border-color:var(--accent)}
+.tile .ic{width:32px;height:32px;border-radius:8px;display:grid;place-items:center;font-family:var(--mono);font-weight:600;background:rgba(70,217,255,.12);color:var(--accent);flex:none}
 .tile .nm{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .tile .nm small{display:block;color:var(--dim);font-size:11px;overflow:hidden;text-overflow:ellipsis}
-.tile .x{opacity:0;border:0;background:none;padding:2px 4px;color:var(--dim)}
-.tile:hover .x{opacity:1}
-.hint{color:var(--dim);font-size:12px;line-height:1.5}
-
-/* center */
-.center{position:relative;overflow:hidden}
-.viewbar{display:none;align-items:center;gap:8px;padding:8px 12px;border-bottom:1px solid var(--line)}
-.viewbar.show{display:flex}
-.viewbar .t{flex:1;font-family:var(--mono);font-size:12px;color:var(--accent)}
-iframe{flex:1;border:0;width:100%;background:#fff;border-radius:0 0 12px 12px;display:none}
-iframe.show{display:block}
-.home{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:24px;text-align:center}
-.home.hide{display:none}
-.big{font-family:var(--mono);font-size:clamp(40px,7vw,84px);color:var(--accent);text-shadow:0 0 30px rgba(70,217,255,.35);line-height:1}
-.greet{font-size:18px}
-.sub{color:var(--dim);max-width:520px;line-height:1.6}
-.log{font-family:var(--mono);font-size:12px;color:var(--dim);min-height:18px}
-.log b{color:var(--accent2);font-weight:400}
+.tile .x{border:0;background:none;padding:2px 5px;color:var(--dim)}
+.tile .x:hover{color:var(--accent)}
 
 /* tasks */
-.addrow{display:flex;gap:6px;margin-bottom:10px}
+.addrow{display:flex;gap:6px}
 .addrow button{flex:none}
 ul.tasks{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:4px}
-ul.tasks li{display:flex;align-items:center;gap:8px;padding:6px 8px;border-radius:8px;background:var(--panel2)}
+ul.tasks li{display:flex;align-items:center;gap:8px;padding:7px 9px;border-radius:8px;background:var(--panel2)}
 ul.tasks li.done span{text-decoration:line-through;color:var(--dim)}
 ul.tasks li span{flex:1;word-break:break-word}
 ul.tasks input[type=checkbox]{width:auto;accent-color:var(--accent)}
 ul.tasks .del{border:0;background:none;color:var(--dim);padding:0 4px}
 
 /* focus */
-.timer{font-family:var(--mono);font-size:40px;text-align:center;color:var(--accent);margin:4px 0 10px}
+.timer{font:600 56px var(--mono);text-align:center;color:var(--accent);margin:10px 0 4px}
 .timer.brk{color:var(--ok)}
 .trow{display:flex;gap:6px;justify-content:center;flex-wrap:wrap}
-.count{text-align:center;color:var(--dim);font-size:12px;margin-top:8px}
-textarea.notes{min-height:120px;resize:vertical;font-family:var(--mono);font-size:12px;line-height:1.5}
+.count{text-align:center;color:var(--dim);font-size:12px}
+textarea.notes{flex:1;min-height:260px;resize:none;font-family:var(--mono);font-size:12.5px;line-height:1.6}
+
+/* chat */
+.chatlog{display:flex;flex-direction:column;gap:8px}
+.msg{padding:8px 11px;border-radius:10px;line-height:1.5;white-space:pre-wrap;word-break:break-word}
+.msg.u{background:var(--panel2);margin-left:36px}
+.msg.a{border:1px solid var(--line);margin-right:20px}
+.msg .who{display:block;font:10px var(--mono);letter-spacing:.14em;color:var(--accent2);margin-bottom:2px}
+.notice{border:1px dashed var(--accent2);border-radius:10px;padding:10px;font-size:13px;display:flex;flex-direction:column;gap:8px}
+
+/* spine */
+.vinfo{border:1px solid var(--line);border-radius:12px;padding:12px;background:rgba(70,217,255,.04)}
+.vinfo h4{margin:0 0 2px;font:600 22px var(--mono);color:var(--accent2)}
+.vinfo .rg{font:10px var(--mono);letter-spacing:.18em;color:var(--dim);text-transform:uppercase}
+.vinfo p{margin:8px 0 0;line-height:1.55}
+.vinfo .nv{color:var(--accent);font-size:12.5px}
+.reg .rl{font:10px var(--mono);letter-spacing:.18em;color:var(--dim);text-transform:uppercase;margin:4px 0}
+.chips{display:flex;flex-wrap:wrap;gap:4px}
+.chips button{padding:3px 7px;font:11px var(--mono)}
+
+/* settings */
+.sec{border-top:1px solid var(--line);padding-top:10px;display:flex;flex-direction:column;gap:6px}
+.sec:first-child{border-top:0;padding-top:0}
+.sl{font:10px var(--mono);letter-spacing:.18em;color:var(--accent);text-transform:uppercase}
+.sec label{font-size:12px;color:var(--dim)}
+.chk{display:flex;align-items:center;gap:8px;color:var(--ink)!important;font-size:13px!important}
+.chk input{width:auto;accent-color:var(--accent)}
+
+/* app view */
+.appview{position:fixed;inset:12px;z-index:10;display:none;flex-direction:column;background:var(--panel);border:1px solid var(--accent);border-radius:14px;overflow:hidden}
+.appview.show{display:flex}
+.avbar{display:flex;align-items:center;gap:8px;padding:8px 12px;border-bottom:1px solid var(--line)}
+.avbar .t{flex:1;font:12px var(--mono);letter-spacing:.15em;color:var(--accent)}
+.appview iframe{flex:1;border:0;width:100%;background:#fff}
 
 /* modal */
 .modal{position:fixed;inset:0;background:rgba(0,0,0,.6);display:none;place-items:center;z-index:20;padding:16px}
 .modal.show{display:grid}
 .card{background:var(--panel);border:1px solid var(--accent);border-radius:14px;padding:18px;width:min(420px,100%);display:flex;flex-direction:column;gap:10px}
-.card h3{margin:0;font-family:var(--mono);letter-spacing:.1em;font-size:14px;color:var(--accent)}
+.card h3{margin:0;font:600 14px var(--mono);letter-spacing:.1em;color:var(--accent)}
 .card label{font-size:12px;color:var(--dim)}
-.card .row{display:flex;gap:8px;justify-content:flex-end}
+.card .row{justify-content:flex-end}
 
 /* boot */
-.boot{position:fixed;inset:0;z-index:30;background:var(--bg);display:grid;place-items:center;text-align:center;transition:opacity .5s}
+.boot{position:fixed;inset:0;z-index:30;background:var(--bg);display:grid;place-items:center;text-align:center;transition:opacity .6s}
 .boot.gone{opacity:0;pointer-events:none}
-.boot .ring{width:150px;height:150px;border-radius:50%;border:3px solid var(--accent);display:grid;place-items:center;margin:0 auto 22px;box-shadow:0 0 40px rgba(70,217,255,.4),inset 0 0 30px rgba(70,217,255,.25);animation:pulse 2s infinite;cursor:pointer}
+.boot .ring{width:150px;height:150px;border-radius:50%;border:3px solid var(--accent);display:grid;place-items:center;margin:0 auto 22px;
+  box-shadow:0 0 40px rgba(70,217,255,.4),inset 0 0 30px rgba(70,217,255,.25);animation:pulse 2s infinite;cursor:pointer}
 .boot .ring span{font-family:var(--mono);letter-spacing:.3em;color:var(--accent)}
-.boot p{color:var(--dim);font-family:var(--mono);font-size:12px;letter-spacing:.15em}
+.boot p{color:var(--dim);font:12px var(--mono);letter-spacing:.15em;margin:6px 0}
 
-@media (max-width:1000px){
-  main{grid-template-columns:1fr;overflow:auto}
-  .center{min-height:420px}
-  .app{height:auto;min-height:100vh}
+@media (max-width:900px){ .date,.brand small{display:none} }
+@media (max-width:760px){
+  .panel{top:auto;left:8px;right:8px;width:auto;bottom:80px;height:60vh;transform:translateY(calc(100% + 100px))}
+  .panel.show{transform:none}
+  .hint-top{display:none}
 }
 </style>
 </head>
 <body>
+
 <div class="boot" id="boot">
   <div>
     <div class="ring" id="engage"><span>ENGAGE</span></div>
     <p>NOMAD INDUSTRIES · WORKSTATION</p>
-    <p style="opacity:.6">click or press Enter</p>
+    <p id="bootSub" style="opacity:.6">click or press Enter</p>
   </div>
 </div>
 
-<div class="app">
-  <header>
-    <div class="brand"><div class="core" id="core"></div>NOMAD <small>WORKSTATION</small></div>
-    <div class="spacer"></div>
-    <div class="persona" title="Voice persona">
-      <button id="pNate">Nate</button><button id="pNat">Nat</button>
-    </div>
-    <button id="micBtn" title="Listen for 'Nate' or 'Nat'">🎙 Listen</button>
-    <button id="menuBtn" title="Backup &amp; settings">⚙</button>
-    <div style="text-align:right">
-      <div class="clock" id="clock">--:--</div>
-      <div class="date" id="date"></div>
-    </div>
-  </header>
+<canvas id="scene"></canvas>
 
-  <main>
-    <!-- apps -->
-    <section class="panel">
-      <div class="ph">Apps <button id="addApp" style="padding:2px 8px">+ Add</button></div>
-      <div class="pb">
-        <div class="apps" id="apps"></div>
-        <p class="hint" style="margin-top:12px">Click an app to open it here. ↗ opens it in its own tab. Hover a tile to edit or remove.</p>
-      </div>
-    </section>
-
-    <!-- center -->
-    <section class="panel center">
-      <div class="viewbar" id="viewbar">
-        <span class="t" id="viewTitle"></span>
-        <button id="popOut">↗ New tab</button>
-        <button id="homeBtn">⌂ Home</button>
-      </div>
-      <iframe id="frame" title="App view" allow="microphone; camera; clipboard-read; clipboard-write"></iframe>
-      <div class="home" id="home">
-        <div class="big" id="bigClock">--:--</div>
-        <div class="greet" id="greet">Good day, sir.</div>
-        <div class="sub" id="brief"></div>
-        <div class="log" id="log"></div>
-      </div>
-    </section>
-
-    <!-- right -->
-    <div class="side">
-      <section class="panel">
-        <div class="ph">Today <span id="taskCount"></span></div>
-        <div class="pb">
-          <div class="addrow"><input id="taskIn" placeholder="Add a task, press Enter"><button id="taskAdd">+</button></div>
-          <ul class="tasks" id="tasks"></ul>
-        </div>
-      </section>
-      <section class="panel">
-        <div class="ph">Focus <span id="mode">Work</span></div>
-        <div class="pb">
-          <div class="timer" id="timer">25:00</div>
-          <div class="trow">
-            <button id="tStart">Start</button>
-            <button id="tReset">Reset</button>
-            <button id="t25" class="on">25/5</button>
-            <button id="t50">50/10</button>
-          </div>
-          <div class="count" id="sessions"></div>
-        </div>
-      </section>
-      <section class="panel" style="flex:1">
-        <div class="ph">Scratchpad</div>
-        <div class="pb" style="display:flex;flex:1"><textarea class="notes" id="notes" placeholder="Quick notes — saved automatically." style="flex:1"></textarea></div>
-      </section>
-    </div>
-  </main>
+<div class="lite-grid" id="lite">
+  <button class="station" data-k="apps"><b>APPS</b><span>Odonta, Nomad Iron and the rest</span></button>
+  <button class="station" data-k="tasks"><b>TODAY</b><span>Tasks for the day</span></button>
+  <button class="station" data-k="focus"><b>FOCUS</b><span>Study timer</span></button>
+  <button class="station" data-k="notes"><b>SCRATCHPAD</b><span>Quick notes</span></button>
+  <button class="station" data-k="chat"><b>CONSOLE</b><span>Talk to Nate or Nat</span></button>
+  <button class="station" data-k="spine"><b>SPINE</b><span>Vertebra reference</span></button>
+  <button class="station" data-k="status"><b>SYSTEMS</b><span>Voices, Ollama, backup</span></button>
 </div>
 
-<!-- add/edit app -->
+<header>
+  <div class="brand"><div class="core" id="core"></div>NOMAD <small>WORKSTATION</small></div>
+  <div class="spacer"></div>
+  <button class="chip-o" id="chip" title="Ollama status"><i></i><span id="chipTxt">OLLAMA</span></button>
+  <div class="persona" title="Voice persona"><button id="pNate">Nate</button><button id="pNat">Nat</button></div>
+  <button id="sysBtn" title="Systems">⚙</button>
+  <div><div class="clock" id="clock">--:--</div><div class="date" id="date"></div></div>
+</header>
+<div class="hint-top" id="hint"></div>
+<div class="tip" id="tip"></div>
+
+<aside class="panel" id="panel">
+  <div class="ph"><span id="pTitle"></span><button id="pClose" title="Back to the room">✕</button></div>
+  <div class="pb" id="pBody"></div>
+</aside>
+
+<div class="subtitle" id="subtitle"></div>
+<form class="cmdbar" id="cmd" autocomplete="off">
+  <button type="button" id="micBtn" title="Listen for 'Nate' or 'Nat'">🎙</button>
+  <input id="cmdIn" placeholder="Speak or type to Nate…">
+  <button type="submit" title="Send">➤</button>
+</form>
+
+<div class="appview" id="appView">
+  <div class="avbar"><span class="t" id="avTitle"></span><button id="avPop">↗ New tab</button><button id="avClose">✕ Back to room</button></div>
+  <iframe id="frame" title="App" allow="microphone; camera; clipboard-read; clipboard-write"></iframe>
+</div>
+
 <div class="modal" id="appModal">
   <div class="card">
     <h3 id="appModalTitle">ADD APP</h3>
@@ -208,301 +235,969 @@ textarea.notes{min-height:120px;resize:vertical;font-family:var(--mono);font-siz
   </div>
 </div>
 
-<!-- settings -->
-<div class="modal" id="menuModal">
-  <div class="card">
-    <h3>SETTINGS</h3>
-    <label>Your name (used in greetings)</label><input id="sName" placeholder="sir">
-    <label>Backup — everything lives in this browser, so export now and then.</label>
-    <div class="row" style="justify-content:flex-start">
-      <button id="exportBtn">Export backup</button>
-      <button id="importBtn">Import backup</button>
-      <input type="file" id="importFile" accept="application/json" style="display:none">
-    </div>
-    <label>Voice commands (say "Nate" or "Nat" first)</label>
-    <div class="hint">“Nate, open Odonta” · “Nat, add task call the landlord” · “Nate, start focus” · “Nat, stop” · “Nate, what time is it” · “Nat, brief me” · “Nate, go home”</div>
-    <div class="row"><button id="mClose" class="on">Done</button></div>
-  </div>
-</div>
-
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script>
 (() => {
-  const $ = id => document.getElementById(id);
-  const KEY = 'nomad.workstation.v1';
+'use strict';
+const $ = id => document.getElementById(id);
+const KEY = 'nomad.workstation.v1';           // same key as v1, so existing apps/tasks carry over
+const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
 
-  // ---------- state ----------
-  const defaults = {
-    name: 'sir',
-    persona: 'nate',
-    apps: [
-      { id: 'odonta', name: 'Odonta', url: '', icon: 'O' },
-      { id: 'iron',   name: 'Nomad Iron', url: '', icon: 'NI' },
-      { id: 'fuel',   name: 'Nomad Fuel', url: '', icon: 'NF' },
-      { id: 'posture',name: 'Posture Lab', url: '', icon: 'PL' }
-    ],
-    tasks: [],
-    notes: '',
-    focusLen: [25, 5],
-    sessions: { day: '', n: 0 }
-  };
-  let S;
-  function load() {
-    try { S = Object.assign({}, defaults, JSON.parse(localStorage.getItem(KEY) || '{}')); }
-    catch (e) { S = JSON.parse(JSON.stringify(defaults)); }
-  }
-  function save() { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} }
-  load();
+/* =================== STATE (saved in this browser) =================== */
+const defaults = {
+  name: 'sir', persona: 'nate', voices: { nate: '', nat: '' }, speak: true, lite: false,
+  ollama: { url: 'http://localhost:11434', model: '' }, chat: [],
+  apps: [
+    { id: 'odonta', name: 'Odonta', url: '', icon: 'O' },
+    { id: 'iron', name: 'Nomad Iron', url: '', icon: 'NI' },
+    { id: 'fuel', name: 'Nomad Fuel', url: '', icon: 'NF' },
+    { id: 'posture', name: 'Posture Lab', url: '', icon: 'PL' }
+  ],
+  tasks: [], notes: '', focusLen: [25, 5], sessions: { day: '', n: 0 }
+};
+let S;
+function merge(saved) {
+  saved = saved && typeof saved === 'object' ? saved : {};
+  const d = JSON.parse(JSON.stringify(defaults));
+  const out = Object.assign(d, saved);
+  out.voices = Object.assign({}, defaults.voices, saved.voices || {});
+  out.ollama = Object.assign({}, defaults.ollama, saved.ollama || {});
+  if (!Array.isArray(out.chat)) out.chat = [];
+  if (!Array.isArray(out.apps)) out.apps = d.apps;
+  if (!Array.isArray(out.tasks)) out.tasks = [];
+  if (!out.sessions || typeof out.sessions !== 'object') out.sessions = { day: '', n: 0 };
+  if (out.persona !== 'nat') out.persona = 'nate';
+  return out;
+}
+function load() { let saved = {}; try { saved = JSON.parse(localStorage.getItem(KEY) || '{}'); } catch (e) {} S = merge(saved); }
+function save() { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} }
+load();
+const today = () => new Date().toLocaleDateString('en-CA');
+if (S.sessions.day !== today()) { S.sessions = { day: today(), n: 0 }; save(); }
 
-  const today = () => new Date().toISOString().slice(0, 10);
-  if (S.sessions.day !== today()) S.sessions = { day: today(), n: 0 };
+let mode = 'overview', models = [], ollamaMsg = 'Not tested yet.', chipState = 'off';
+let running = false, onBreak = false, remaining = S.focusLen[0] * 60, timerId = null, endAt = 0;
+let selVert = -1, hoverVert = -1, hoverKey = null, currentApp = null, T = null;
+const screens = {};
 
-  // ---------- voice ----------
-  const synth = window.speechSynthesis;
-  const VOICES = {
-    nate: ['Daniel', 'Arthur', 'Oliver', 'Alex', 'Aaron', 'Fred', 'Rishi', 'Google UK English Male', 'Microsoft Ryan', 'Microsoft Guy'],
-    nat:  ['Serena', 'Kate', 'Samantha', 'Karen', 'Moira', 'Tessa', 'Victoria', 'Google UK English Female', 'Microsoft Sonia', 'Microsoft Jenny']
-  };
-  function pickVoice(p) {
-    if (!synth) return null;
-    const vs = synth.getVoices().filter(v => /^en/i.test(v.lang));
-    for (const n of VOICES[p]) { const v = vs.find(v => v.name.includes(n)); if (v) return v; }
-    return vs[0] || null;
-  }
-  function say(text, persona = S.persona) {
-    log(text, persona);
-    if (!synth) return;
+const pName = (p = S.persona) => p === 'nat' ? 'Nat' : 'Nate';
+const LABEL = k => ({ apps: 'Apps', tasks: 'Today', focus: 'Focus', notes: 'Scratchpad', spine: 'Spine model', status: 'Systems', chat: `${pName()} console` })[k] || k;
+const hm = () => new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
+const partOfDay = () => { const h = new Date().getHours(); return h < 12 ? 'Good morning' : h < 18 ? 'Good afternoon' : 'Good evening'; };
+const openTasks = () => S.tasks.filter(t => !t.done);
+function briefText() {
+  const n = openTasks().length;
+  return `${n === 0 ? 'Your list is clear' : `${n} task${n > 1 ? 's' : ''} outstanding`}, and ${S.sessions.n} focus session${S.sessions.n === 1 ? '' : 's'} logged today.`;
+}
+
+/* =================== VOICE =================== */
+const synth = window.speechSynthesis || null;
+const PREF = {
+  nate: ['Daniel', 'Arthur', 'Oliver', 'Google UK English Male', 'Microsoft Ryan', 'Alex', 'Aaron', 'Fred', 'Rishi', 'Microsoft Guy', 'Microsoft David'],
+  nat:  ['Serena', 'Kate', 'Stephanie', 'Google UK English Female', 'Microsoft Sonia', 'Samantha', 'Karen', 'Moira', 'Tessa', 'Microsoft Jenny', 'Microsoft Zira']
+};
+let voiceList = [];
+function refreshVoices() { if (synth) voiceList = synth.getVoices().filter(v => /^en/i.test(v.lang)); }
+// Voices load asynchronously; speaking before they arrive falls back to the system default (often a female voice).
+const voicesReady = new Promise(res => {
+  if (!synth) return res();
+  refreshVoices(); if (voiceList.length) return res();
+  let done = false; const fin = () => { if (done) return; done = true; refreshVoices(); res(); };
+  if (synth.addEventListener) synth.addEventListener('voiceschanged', fin); else synth.onvoiceschanged = fin;
+  setTimeout(fin, 2500);
+});
+if (synth && synth.addEventListener) synth.addEventListener('voiceschanged', () => { refreshVoices(); if (mode === 'status') fillVoiceSelects(); });
+
+function pickVoice(p) {
+  if (!voiceList.length) refreshVoices();
+  const chosen = S.voices[p];
+  if (chosen) { const v = voiceList.find(v => v.name === chosen); if (v) return v; }
+  for (const n of PREF[p]) { const v = voiceList.find(v => v.name.includes(n)); if (v) return v; }
+  return voiceList.find(v => v.default) || voiceList[0] || null;
+}
+let speaking = false, speakTimer = null;
+function setCore(on) { $('core').classList.toggle('live', on); }
+function say(text, persona = S.persona, opts = {}) {
+  text = String(text || '').trim(); if (!text) return;
+  if (!opts.noSub) subtitle(text, persona);
+  if (!synth || opts.mute) return;
+  voicesReady.then(() => {
     try {
       synth.cancel();
-      const u = new SpeechSynthesisUtterance(text);
-      const v = pickVoice(persona); if (v) u.voice = v;
-      u.rate = 1.02; u.pitch = persona === 'nat' ? 1.05 : 0.95;
-      const core = $('core'); core.classList.add('live');
-      u.onend = () => core.classList.remove('live');
-      synth.speak(u);
-    } catch (e) {}
-  }
-  if (synth) synth.onvoiceschanged = () => {};
-  function log(text, persona) {
-    $('log').innerHTML = `<b>${persona === 'nat' ? 'NAT' : 'NATE'} ›</b> ${escapeHtml(text)}`;
-  }
-  function setPersona(p) {
-    S.persona = p; save();
-    $('pNate').classList.toggle('on', p === 'nate');
-    $('pNat').classList.toggle('on', p === 'nat');
-  }
-  $('pNate').onclick = () => { setPersona('nate'); say(`Nate here, ${S.name}.`); };
-  $('pNat').onclick  = () => { setPersona('nat');  say(`Nat here, ${S.name}.`); };
-  setPersona(S.persona);
+      const parts = text.match(/[^.!?]+[.!?]*\s*/g) || [text];
+      const chunks = [];
+      for (const p of parts) { if (chunks.length && chunks[chunks.length - 1].length + p.length < 180) chunks[chunks.length - 1] += p; else chunks.push(p); }
+      const list = chunks.map(c => c.trim()).filter(Boolean);
+      const v = pickVoice(persona);
+      speaking = true; clearTimeout(speakTimer); setCore(true);
+      list.forEach((c, i) => {
+        const u = new SpeechSynthesisUtterance(c);
+        if (v) { u.voice = v; u.lang = v.lang; }
+        u.rate = 1.02; u.pitch = persona === 'nat' ? 1.05 : 0.92;
+        if (i === list.length - 1) u.onend = u.onerror = () => { setCore(false); speakTimer = setTimeout(() => { speaking = false; }, 700); };
+        synth.speak(u);
+      });
+    } catch (e) { speaking = false; setCore(false); }
+  });
+}
+let subT;
+function subtitle(text, persona = S.persona, streaming = false) {
+  const el = $('subtitle');
+  el.innerHTML = `<b>${persona === 'nat' ? 'NAT' : 'NATE'} ›</b> ${esc(text)}`;
+  el.classList.add('show'); clearTimeout(subT);
+  if (!streaming) subT = setTimeout(() => el.classList.remove('show'), Math.min(22000, 5000 + text.length * 55));
+}
+function setPersona(p) {
+  S.persona = p === 'nat' ? 'nat' : 'nate'; save();
+  $('pNate').classList.toggle('on', S.persona === 'nate');
+  $('pNat').classList.toggle('on', S.persona === 'nat');
+  $('cmdIn').placeholder = `Speak or type to ${pName()}…`;
+  $('bootSub').textContent = `${pName().toUpperCase()} STANDING BY · click or press Enter`;
+  drawScreen('chat'); drawScreen('status');
+  if (mode === 'chat') $('pTitle').textContent = LABEL('chat');
+}
+$('pNate').onclick = () => { setPersona('nate'); say(`Nate here, ${S.name}.`); };
+$('pNat').onclick = () => { setPersona('nat'); say(`Nat here, ${S.name}.`); };
 
-  // ---------- listening ("Nate" / "Nat") ----------
-  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-  let rec = null, listening = false;
-  $('micBtn').onclick = () => {
-    if (!SR) { say(`This browser can't listen, ${S.name}. Chrome or Safari will.`); return; }
-    listening ? stopListening() : startListening();
+/* =================== LISTENING =================== */
+const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+let rec = null, listening = false;
+$('micBtn').onclick = () => {
+  if (!SR) return say(`This browser can't listen, ${S.name}. Chrome or Safari can.`);
+  listening ? stopListening() : startListening();
+};
+function startListening() {
+  rec = new SR(); rec.lang = 'en-ZA'; rec.continuous = true; rec.interimResults = false;
+  rec.onresult = e => {
+    if (speaking) return;                       // don't hear ourselves
+    const t = e.results[e.results.length - 1][0].transcript.trim();
+    const m = t.match(/\b(nate|nathan|nat|natasha|natalie)\b[\s,.:]*(.*)$/i);
+    if (!m) return;
+    const p = /^nat(e|han)$/i.test(m[1]) ? 'nate' : 'nat';
+    setPersona(p); command(m[2] || '', p, false);
   };
-  function startListening() {
-    rec = new SR(); rec.lang = 'en-ZA'; rec.continuous = true; rec.interimResults = false;
-    rec.onresult = e => {
-      const t = e.results[e.results.length - 1][0].transcript.trim().toLowerCase();
-      const m = t.match(/\b(nate|nat|natasha|nathan)\b[\s,]*(.*)$/);
-      if (!m) return;
-      const persona = (m[1] === 'nate' || m[1] === 'nathan') ? 'nate' : 'nat';
-      setPersona(persona);
-      command(m[2] || '', persona);
-    };
-    rec.onerror = e => { if (e.error === 'not-allowed') { stopListening(); say(`Microphone access was declined, ${S.name}.`); } };
-    rec.onend = () => { if (listening) try { rec.start(); } catch (e) {} };
-    try { rec.start(); listening = true; $('micBtn').classList.add('on'); $('micBtn').textContent = '🎙 Listening'; log('Listening for Nate or Nat.', S.persona); } catch (e) {}
-  }
-  function stopListening() {
-    listening = false; try { rec && rec.stop(); } catch (e) {}
-    $('micBtn').classList.remove('on'); $('micBtn').textContent = '🎙 Listen';
-  }
+  rec.onerror = e => { if (e.error === 'not-allowed' || e.error === 'service-not-allowed') { stopListening(); say(`Microphone access was declined, ${S.name}.`); } };
+  rec.onend = () => { if (listening) { try { rec.start(); } catch (e) {} } };
+  try { rec.start(); listening = true; $('micBtn').classList.add('on'); subtitle(`Listening. Say "Nate" or "Nat" first.`); } catch (e) {}
+}
+function stopListening() { listening = false; try { rec && rec.stop(); } catch (e) {} $('micBtn').classList.remove('on'); }
 
-  function command(c, p) {
-    c = c.replace(/^(please|can you|could you)\s+/, '').trim();
-    if (!c) return say(`Yes, ${S.name}?`, p);
-    let m;
-    if ((m = c.match(/^(open|launch|show|start)\s+(.+)$/)) && !/focus|timer/.test(m[2])) {
-      const q = m[2].replace(/\bapp\b/, '').trim();
-      const a = S.apps.find(a => a.name.toLowerCase().includes(q) || q.includes(a.name.toLowerCase()));
-      if (a) { openApp(a); return say(`Opening ${a.name}.`, p); }
-      return say(`I have no app called ${q}, ${S.name}.`, p);
+/* =================== COMMANDS =================== */
+const STATIONS = [
+  [/^(tasks?|today|to-?do( list)?|list)$/, 'tasks'], [/^(focus|timer|pomodoro)$/, 'focus'],
+  [/^(notes?|scratch ?pad|pin ?board)$/, 'notes'], [/^(spine|spine model|skeleton)$/, 'spine'],
+  [/^(systems?|settings)$/, 'status'], [/^(console|chat)$/, 'chat'], [/^apps?$/, 'apps']
+];
+function command(raw, p = S.persona, typed = false) {
+  const c = String(raw).toLowerCase().replace(/[?.!,]+$/, '').replace(/^(please|can you|could you|would you)\s+/, '').trim();
+  if (!c) return say(`Yes, ${S.name}?`, p);
+  let m;
+  if ((m = c.match(/^(open|show|show me|go to|launch|bring up|pull up)\s+(?:the\s+|my\s+)?(.+)$/))) {
+    const q = m[2].replace(/\s+app$/, '').trim();
+    for (const [re, k] of STATIONS) if (re.test(q)) { closeApp(); focus(k); return say(`${LABEL(k)}.`, p); }
+    const v = findVert(q); if (v >= 0) { focus('spine'); selectVert(v); return say(vertSpeech(v), p); }
+    const a = S.apps.find(a => a.name.toLowerCase() === q) || S.apps.find(a => a.name.toLowerCase().includes(q) || q.includes(a.name.toLowerCase()));
+    if (a) { openApp(a); return say(`Opening ${a.name}.`, p); }
+    if (/^(open|launch)$/.test(m[1])) return say(`I have no app called ${q}, ${S.name}.`, p);
+  }
+  if ((m = c.match(/^(?:add (?:a )?task|new task|remind me to)\s+(.+)$/))) { addTask(m[1]); return say(`Added: ${m[1]}.`, p); }
+  if (/^(start|begin|engage)\s+(a\s+)?(focus|timer|pomodoro)/.test(c) || c === 'focus') { if (!running) toggleTimer(); return say(`Focus engaged. ${S.focusLen[0]} minutes.`, p); }
+  if (/^(stop|pause)(\s+(the\s+)?(focus|timer))?$/.test(c)) { if (running) toggleTimer(); return say('Paused.', p); }
+  if (/\btime\b/.test(c) && c.split(' ').length <= 5) return say(`It's ${hm()}, ${S.name}.`, p);
+  if (/^(brief( me)?|status( report)?|how('s| is) my day( looking)?)$/.test(c)) return say(briefText(), p);
+  if (/^(go\s+)?(home|back|room|overview|close)$/.test(c)) { closeApp(); back(); return say('Very good.', p); }
+  if ((m = c.match(/^(?:vertebra|show)\s+(.+)$/))) { const v = findVert(m[1]); if (v >= 0) { focus('spine'); selectVert(v); return say(vertSpeech(v), p); } }
+  return ask(raw, p);
+}
+$('cmd').addEventListener('submit', e => {
+  e.preventDefault();
+  const v = $('cmdIn').value.trim(); if (!v) return; $('cmdIn').value = '';
+  let p = S.persona, text = v;
+  const m = v.match(/^(nate|nat|natasha)\b[\s,:]*(.*)$/i);
+  if (m) { p = m[1].toLowerCase() === 'nate' ? 'nate' : 'nat'; setPersona(p); text = m[2]; }
+  command(text, p, true);
+});
+
+/* =================== OLLAMA =================== */
+const base = () => String(S.ollama.url || '').trim().replace(/\/+$/, '');
+function setChip(state) {
+  chipState = state; const c = $('chip'); c.classList.toggle('on', state === 'on'); c.classList.toggle('busy', state === 'busy');
+  $('chipTxt').textContent = state === 'on' ? `OLLAMA · ${(S.ollama.model || '').split(':')[0].toUpperCase()}` : state === 'busy' ? 'OLLAMA · …' : 'OLLAMA · OFF';
+  drawScreen('status');
+}
+$('chip').onclick = () => focus('status');
+async function testOllama(silent) {
+  setChip('busy');
+  try {
+    const r = await fetch(base() + '/api/tags', { cache: 'no-store' });
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    const j = await r.json();
+    models = (j.models || []).map(m => m.name);
+    if (models.length && !models.includes(S.ollama.model)) { S.ollama.model = models[0]; save(); }
+    ollamaMsg = models.length ? `Connected · ${models.length} model${models.length > 1 ? 's' : ''} available.` : 'Connected, but no models are pulled yet. Run: ollama pull llama3.2';
+    setChip(models.length ? 'on' : 'off');
+  } catch (e) {
+    ollamaMsg = `Not reachable. Check Ollama is running and that it allows ${location.origin}. (${e.message})`;
+    setChip('off');
+  }
+  if (mode === 'status') renderPanel('status');
+  if (!silent) say(chipState === 'on' ? `Ollama linked, ${S.name}. Running ${S.ollama.model.split(':')[0]}.` : `Ollama is not responding, ${S.name}.`);
+}
+const clean = s => String(s).replace(/<think>[\s\S]*?(<\/think>|$)/gi, '').replace(/[*_#`>]+/g, '').replace(/\n{3,}/g, '\n\n').trim();
+function sysPrompt(p) {
+  const open = openTasks().map(t => t.text).slice(0, 10);
+  return `You are ${pName(p)}, the voice of Nomad, a personal workstation built by Nomad Industries for its owner, a chiropractic student. ` +
+    `Your manner is that of a dry, formal, quietly witty British AI butler. Address the user as "${S.name}". ` +
+    `Be brief: under 70 words unless asked for detail. Plain sentences only, no markdown, lists or emoji, because replies are read aloud. ` +
+    `Be accurate; if you are unsure, say so plainly.\n` +
+    `Context. Time: ${new Date().toLocaleString()}. Open tasks: ${open.length ? open.join('; ') : 'none'}. ` +
+    `Focus sessions today: ${S.sessions.n}. Apps on the workstation: ${S.apps.map(a => a.name).join(', ')}.`;
+}
+let asking = null;
+async function ask(text, p = S.persona) {
+  text = String(text).trim(); if (!text) return;
+  if (!S.ollama.model) return say(`No language model is linked yet, ${S.name}. Open Systems to connect Ollama.`, p);
+  if (asking) asking.abort();
+  const ctrl = new AbortController(); asking = ctrl;
+  S.chat.push({ role: 'user', content: text }); S.chat = S.chat.slice(-30); save(); renderChat();
+  setChip('busy'); subtitle('…', p, true);
+  let out = '';
+  try {
+    const msgs = [{ role: 'system', content: sysPrompt(p) }, ...S.chat.slice(-12).map(m => ({ role: m.role, content: m.content }))];
+    const r = await fetch(base() + '/api/chat', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, signal: ctrl.signal,
+      body: JSON.stringify({ model: S.ollama.model, stream: true, messages: msgs, options: { num_predict: 400, temperature: 0.6 } })
+    });
+    if (!r.ok) throw new Error(`HTTP ${r.status} ${(await r.text()).slice(0, 140)}`);
+    const reader = r.body.getReader(), dec = new TextDecoder(); let buf = '';
+    for (;;) {
+      const { done, value } = await reader.read(); if (done) break;
+      buf += dec.decode(value, { stream: true });
+      let i;
+      while ((i = buf.indexOf('\n')) >= 0) {
+        const line = buf.slice(0, i).trim(); buf = buf.slice(i + 1); if (!line) continue;
+        let j; try { j = JSON.parse(line); } catch (e) { continue; }
+        if (j.error) throw new Error(j.error);
+        if (j.message && j.message.content) { out += j.message.content; const shown = clean(out); if (shown) { subtitle(shown, p, true); renderChatLive(shown, p); } }
+      }
     }
-    if ((m = c.match(/^(add (a )?task|remind me to|add)\s+(.+)$/))) { addTask(m[3]); return say(`Added: ${m[3]}.`, p); }
-    if (/focus|timer|pomodoro/.test(c) && !/stop|pause/.test(c)) { if (!running) toggleTimer(); return say(`Focus engaged. ${S.focusLen[0]} minutes.`, p); }
-    if (/^(stop|pause)/.test(c)) { if (running) toggleTimer(); return say('Paused.', p); }
-    if (/time/.test(c)) return say(`It's ${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}, ${S.name}.`, p);
-    if (/brief|status|today/.test(c)) return say(briefText(), p);
-    if (/home|close/.test(c)) { goHome(); return say('Home.', p); }
-    if (/thank/.test(c)) return say(`Always, ${S.name}.`, p);
-    say(`I didn't catch a command there, ${S.name}.`, p);
-  }
+    out = clean(out) || `I have nothing useful to add, ${S.name}.`;
+    S.chat.push({ role: 'assistant', content: out, p }); S.chat = S.chat.slice(-30); save();
+    renderChat(); drawScreen('chat'); setChip('on');
+    subtitle(out, p);
+    if (S.speak) say(out, p, { noSub: true });
+  } catch (e) {
+    if (e.name === 'AbortError') return;
+    S.chat.pop(); save(); renderChat(); setChip('off');
+    ollamaMsg = `Last request failed: ${e.message}`;
+    say(`I can't reach Ollama, ${S.name}. Systems will have the details.`, p);
+  } finally { if (asking === ctrl) asking = null; }
+}
 
-  // ---------- clock / greeting ----------
-  function tick() {
-    const d = new Date();
-    const hm = d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-    $('clock').textContent = hm; $('bigClock').textContent = hm;
-    $('date').textContent = d.toLocaleDateString([], { weekday: 'long', day: 'numeric', month: 'long' });
+/* =================== SPINE DATA =================== */
+const VN = [];
+for (let i = 1; i <= 7; i++) VN.push('C' + i);
+for (let i = 1; i <= 12; i++) VN.push('T' + i);
+for (let i = 1; i <= 5; i++) VN.push('L' + i);
+VN.push('Sacrum', 'Coccyx');
+const REGIONS = [
+  { name: 'Cervical', idx: [0, 1, 2, 3, 4, 5, 6] },
+  { name: 'Thoracic', idx: [7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18] },
+  { name: 'Lumbar', idx: [19, 20, 21, 22, 23] },
+  { name: 'Sacrum & coccyx', idx: [24, 25] }
+];
+function vertInfo(i) {
+  if (i < 7) {
+    const n = i + 1;
+    const text = i === 0 ? 'Atlas: a ring with no vertebral body or spinous process. It carries the occiput, and the atlanto-occipital joint provides most of the head’s nodding.'
+      : i === 1 ? 'Axis: its dens (odontoid process) projects up through the atlas, forming the pivot for roughly half of cervical rotation at C1–C2.'
+      : i === 6 ? 'Vertebra prominens: a long, non-bifid spinous process, the usual palpable landmark at the cervicothoracic junction.'
+      : 'Typical cervical vertebra: small body, uncinate processes, a bifid spinous process and transverse foramina for the vertebral artery.';
+    return { title: VN[i], region: 'Cervical', text, nerve: `The C${n} nerve exits above this vertebra.` + (i === 6 ? ' C8 exits below it, between C7 and T1.' : '') };
   }
-  function partOfDay() { const h = new Date().getHours(); return h < 12 ? 'Good morning' : h < 18 ? 'Good afternoon' : 'Good evening'; }
-  function briefText() {
-    const open = S.tasks.filter(t => !t.done).length;
-    const tasks = open === 0 ? 'Your list is clear' : `${open} task${open > 1 ? 's' : ''} outstanding`;
-    return `${tasks}, and ${S.sessions.n} focus session${S.sessions.n === 1 ? '' : 's'} logged today.`;
+  if (i < 19) {
+    const n = i - 6;
+    const text = n === 1 ? 'First thoracic: a full costal facet for the first rib, plus a demifacet for the second.'
+      : n === 12 ? 'Transitional vertebra: thoracic-type superior facets and lumbar-type inferior facets, with a single full costal facet for rib 12.'
+      : n === 11 ? 'Lower thoracic: a single full costal facet on the body and no transverse costal facet.'
+      : 'Typical thoracic vertebra: heart-shaped body, costal facets for the ribs and a long, downward-sloping spinous process.';
+    return { title: VN[i], region: 'Thoracic', text, nerve: `The T${n} nerve exits below this vertebra.` };
   }
-  function renderHome() {
-    $('greet').textContent = `${partOfDay()}, ${S.name}.`;
-    $('brief').textContent = briefText();
+  if (i < 24) {
+    const n = i - 18;
+    const text = n === 5 ? 'The largest, wedge-shaped lumbar body. It forms the lumbosacral junction with S1, a common source of disc and facet complaints.'
+      : 'Lumbar vertebra: a large kidney-shaped body, sagittally oriented facets and mammillary processes, built for load-bearing.';
+    return { title: VN[i], region: 'Lumbar', text, nerve: `The L${n} nerve exits below this vertebra.` };
   }
-  tick(); setInterval(tick, 1000 * 5);
+  if (i === 24) return { title: 'Sacrum', region: 'Sacral', text: 'Five fused segments (S1–S5). It articulates with the ilia at the sacroiliac joints; the sacral promontory at S1 marks the pelvic inlet.', nerve: 'The sacral nerves leave mainly through the anterior and posterior sacral foramina.' };
+  return { title: 'Coccyx', region: 'Coccygeal', text: 'Usually four small fused segments (three to five). It anchors parts of the pelvic floor and gluteus maximus.', nerve: 'The coccygeal nerve emerges near the sacrococcygeal junction.' };
+}
+const vertSpeech = i => { const v = vertInfo(i); return `${v.title}. ${v.text}`; };
+function findVert(q) {
+  q = String(q).toLowerCase().replace(/\b(vertebra|the)\b/g, '').replace(/\s+/g, '').replace(/^see/, 'c').replace(/^tea/, 't').replace(/^el/, 'l');
+  if (/^atlas/.test(q)) return 0; if (/^axis/.test(q)) return 1;
+  if (/^sacrum/.test(q)) return 24; if (/^coccyx/.test(q)) return 25;
+  const m = q.match(/^([ctl])(\d{1,2})$/); if (!m) return -1;
+  const n = +m[2];
+  if (m[1] === 'c' && n >= 1 && n <= 7) return n - 1;
+  if (m[1] === 't' && n >= 1 && n <= 12) return n + 6;
+  if (m[1] === 'l' && n >= 1 && n <= 5) return n + 18;
+  return -1;
+}
+function selectVert(i) {
+  selVert = i; paintSpine();
+  if (mode === 'spine') renderPanel('spine');
+}
 
-  // ---------- apps ----------
-  let current = null;
-  function renderApps() {
-    const wrap = $('apps'); wrap.innerHTML = '';
-    S.apps.forEach(a => {
-      const el = document.createElement('div');
-      el.className = 'tile' + (current && current.id === a.id ? ' active' : '');
-      el.innerHTML = `<div class="ic">${escapeHtml(a.icon || a.name[0])}</div>
-        <div class="nm">${escapeHtml(a.name)}<small>${a.url ? escapeHtml(a.url.replace(/^https?:\/\//, '')) : 'tap to set address'}</small></div>
-        <button class="x" data-act="ext" title="Open in new tab">↗</button>
-        <button class="x" data-act="edit" title="Edit">✎</button>
-        <button class="x" data-act="del" title="Remove">✕</button>`;
-      el.onclick = e => {
-        const act = e.target.dataset.act;
-        if (act === 'del') { if (confirm(`Remove ${a.name}?`)) { S.apps = S.apps.filter(x => x.id !== a.id); save(); if (current && current.id === a.id) goHome(); renderApps(); } return; }
-        if (act === 'edit') return editApp(a);
-        if (act === 'ext') { if (a.url) window.open(a.url, '_blank'); else editApp(a); return; }
-        openApp(a);
-      };
-      wrap.appendChild(el);
+/* =================== SCREEN DRAWINGS (textures on the 3D monitors) =================== */
+const F = (w, s) => `${w} ${s}px "JetBrains Mono", ui-monospace, Menlo, monospace`;
+function fit(ctx, t, max) { t = String(t); if (ctx.measureText(t).width <= max) return t; while (t.length > 1 && ctx.measureText(t + '…').width > max) t = t.slice(0, -1); return t + '…'; }
+function wrap(ctx, text, max) {
+  const out = [];
+  String(text).split('\n').forEach(para => {
+    let l = '';
+    para.split(/\s+/).forEach(w => { const tt = l ? l + ' ' + w : w; if (ctx.measureText(tt).width > max && l) { out.push(l); l = w; } else l = tt; });
+    out.push(l);
+  });
+  return out;
+}
+function frame2d(ctx, W, H, title, right) {
+  ctx.textAlign = 'left'; ctx.textBaseline = 'top';
+  ctx.fillStyle = '#04101d'; ctx.fillRect(0, 0, W, H);
+  ctx.strokeStyle = 'rgba(70,217,255,.07)'; ctx.lineWidth = 1;
+  for (let x = 0; x < W; x += 24) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, H); ctx.stroke(); }
+  for (let y = 0; y < H; y += 24) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke(); }
+  ctx.strokeStyle = 'rgba(70,217,255,.55)'; ctx.lineWidth = 3; ctx.strokeRect(6, 6, W - 12, H - 12);
+  ctx.fillStyle = '#46d9ff'; ctx.font = F(600, 19); ctx.fillText(title, 20, 18);
+  if (right) { ctx.textAlign = 'right'; ctx.fillStyle = '#7f93ad'; ctx.font = F(400, 14); ctx.fillText(right, W - 20, 21); ctx.textAlign = 'left'; }
+  ctx.fillStyle = 'rgba(70,217,255,.35)'; ctx.fillRect(20, 46, W - 40, 2);
+}
+const fmt = s => String(Math.floor(s / 60)).padStart(2, '0') + ':' + String(s % 60).padStart(2, '0');
+const DRAW = {
+  apps(ctx, W, H) {
+    frame2d(ctx, W, H, 'APPS', `${S.apps.length} LINKED`);
+    const list = S.apps.slice(0, 8), rows = Math.max(1, Math.ceil(list.length / 2));
+    const cw = (W - 60) / 2, rh = Math.min(58, (H - 76) / rows);
+    list.forEach((a, i) => {
+      const x = 20 + (i % 2) * (cw + 20), y = 62 + Math.floor(i / 2) * rh, bh = rh - 10, ic = bh - 12;
+      ctx.strokeStyle = 'rgba(70,217,255,.5)'; ctx.lineWidth = 2; ctx.strokeRect(x, y, cw, bh);
+      ctx.fillStyle = 'rgba(70,217,255,.14)'; ctx.fillRect(x + 6, y + 6, ic, ic);
+      ctx.fillStyle = '#46d9ff'; ctx.font = F(600, 15); ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.fillText(String(a.icon || a.name[0]).slice(0, 2), x + 6 + ic / 2, y + bh / 2);
+      ctx.textAlign = 'left'; ctx.fillStyle = a.url ? '#d8e6f5' : '#7f93ad'; ctx.font = F(400, 16);
+      ctx.fillText(fit(ctx, a.name, cw - ic - 24), x + ic + 16, y + bh / 2);
     });
-  }
-  function openApp(a) {
-    if (!a.url) return editApp(a);
-    current = a;
-    $('frame').src = a.url; $('frame').classList.add('show');
-    $('home').classList.add('hide'); $('viewbar').classList.add('show');
-    $('viewTitle').textContent = a.name.toUpperCase();
-    renderApps();
-  }
-  function goHome() {
-    current = null; $('frame').src = 'about:blank'; $('frame').classList.remove('show');
-    $('home').classList.remove('hide'); $('viewbar').classList.remove('show');
-    renderHome(); renderApps();
-  }
-  $('homeBtn').onclick = goHome;
-  $('popOut').onclick = () => current && window.open(current.url, '_blank');
-
-  let editing = null;
-  function editApp(a) {
-    editing = a || null;
-    $('appModalTitle').textContent = a ? 'EDIT APP' : 'ADD APP';
-    $('aName').value = a ? a.name : ''; $('aUrl').value = a ? a.url : ''; $('aIcon').value = a ? a.icon : '';
-    $('appModal').classList.add('show'); setTimeout(() => (a ? $('aUrl') : $('aName')).focus(), 50);
-  }
-  $('addApp').onclick = () => editApp(null);
-  $('aCancel').onclick = () => $('appModal').classList.remove('show');
-  $('aSave').onclick = () => {
-    const name = $('aName').value.trim(); let url = $('aUrl').value.trim();
-    if (!name) return $('aName').focus();
-    if (url && !/^[a-z]+:\/\//i.test(url)) url = 'https://' + url;
-    const icon = $('aIcon').value.trim() || name.slice(0, 2);
-    if (editing) Object.assign(editing, { name, url, icon });
-    else S.apps.push({ id: 'a' + Date.now(), name, url, icon });
-    save(); renderApps(); $('appModal').classList.remove('show');
-  };
-  [$('aName'), $('aUrl'), $('aIcon')].forEach(i => i.addEventListener('keydown', e => { if (e.key === 'Enter') $('aSave').click(); }));
-
-  // ---------- tasks ----------
-  function addTask(text) { S.tasks.push({ id: Date.now() + Math.random(), text, done: false }); save(); renderTasks(); }
-  function renderTasks() {
-    const ul = $('tasks'); ul.innerHTML = '';
-    S.tasks.forEach(t => {
-      const li = document.createElement('li'); if (t.done) li.className = 'done';
-      li.innerHTML = `<input type="checkbox" ${t.done ? 'checked' : ''}><span>${escapeHtml(t.text)}</span><button class="del" title="Delete">✕</button>`;
-      li.querySelector('input').onchange = e => { t.done = e.target.checked; save(); renderTasks(); };
-      li.querySelector('.del').onclick = () => { S.tasks = S.tasks.filter(x => x !== t); save(); renderTasks(); };
-      ul.appendChild(li);
+    if (!list.length) { ctx.fillStyle = '#7f93ad'; ctx.font = F(400, 16); ctx.fillText('No apps yet. Click to add.', 20, 70); }
+  },
+  tasks(ctx, W, H) {
+    const open = openTasks();
+    frame2d(ctx, W, H, 'TODAY', `${open.length} OPEN`);
+    if (!open.length) {
+      ctx.textAlign = 'center'; ctx.fillStyle = '#5be39b'; ctx.font = F(600, 30); ctx.fillText('LIST CLEAR', W / 2, H / 2 - 20);
+      ctx.fillStyle = '#7f93ad'; ctx.font = F(400, 14); ctx.fillText('Nothing outstanding.', W / 2, H / 2 + 20); return;
+    }
+    ctx.font = F(400, 16);
+    const max = Math.floor((H - 80) / 30);
+    open.slice(0, max).forEach((t, i) => {
+      const y = 62 + i * 30;
+      ctx.strokeStyle = '#46d9ff'; ctx.lineWidth = 2; ctx.strokeRect(22, y + 2, 15, 15);
+      ctx.fillStyle = '#d8e6f5'; ctx.fillText(fit(ctx, t.text, W - 70), 48, y);
     });
-    const open = S.tasks.filter(t => !t.done).length;
-    $('taskCount').textContent = S.tasks.length ? `${open} open` : '';
-    renderHome();
+    if (open.length > max) { ctx.fillStyle = '#7f93ad'; ctx.fillText(`+${open.length - max} more`, 48, 62 + max * 30); }
+  },
+  focus(ctx, W, H) {
+    frame2d(ctx, W, H, 'FOCUS', onBreak ? 'BREAK' : 'WORK');
+    ctx.textAlign = 'center'; ctx.fillStyle = onBreak ? '#5be39b' : '#46d9ff'; ctx.font = F(600, 88);
+    ctx.fillText(fmt(remaining), W / 2, 72);
+    const total = S.focusLen[onBreak ? 1 : 0] * 60, k = 1 - remaining / total;
+    ctx.strokeStyle = 'rgba(70,217,255,.4)'; ctx.lineWidth = 2; ctx.strokeRect(40, 190, W - 80, 12);
+    ctx.fillStyle = onBreak ? '#5be39b' : '#46d9ff'; ctx.fillRect(42, 192, (W - 84) * k, 8);
+    ctx.fillStyle = '#7f93ad'; ctx.font = F(400, 14);
+    ctx.fillText(`${running ? 'RUNNING' : 'PAUSED'} · ${S.sessions.n} SESSION${S.sessions.n === 1 ? '' : 'S'} TODAY`, W / 2, 222);
+  },
+  status(ctx, W, H) {
+    frame2d(ctx, W, H, 'SYSTEMS', `${pName().toUpperCase()} ONLINE`);
+    ctx.fillStyle = '#46d9ff'; ctx.font = F(600, 74); ctx.fillText(hm(), 24, 62);
+    ctx.fillStyle = '#7f93ad'; ctx.font = F(400, 15);
+    ctx.fillText(new Date().toLocaleDateString([], { weekday: 'long', day: 'numeric', month: 'long' }).toUpperCase(), 26, 146);
+    const rows = [['VOICE', pName().toUpperCase()], ['OLLAMA', chipState === 'on' ? (S.ollama.model || 'LINKED').toUpperCase() : 'OFFLINE'], ['TASKS', `${openTasks().length} OPEN`]];
+    ctx.font = F(400, 15);
+    rows.forEach(([k, v], i) => { ctx.fillStyle = '#7f93ad'; ctx.fillText(k, W * 0.55, 72 + i * 28); ctx.fillStyle = k === 'OLLAMA' && chipState !== 'on' ? '#ff6b6b' : '#ffb547'; ctx.fillText(fit(ctx, v, W * 0.45 - 110), W * 0.55 + 90, 72 + i * 28); });
+    ctx.textAlign = 'right'; ctx.fillStyle = 'rgba(70,217,255,.5)'; ctx.font = F(600, 13); ctx.fillText('NOMAD INDUSTRIES', W - 22, H - 32);
+  },
+  chat(ctx, W, H) {
+    frame2d(ctx, W, H, `${pName().toUpperCase()} CONSOLE`);
+    const last = [...S.chat].reverse().find(m => m.role === 'assistant');
+    ctx.font = F(400, 15); ctx.fillStyle = '#d8e6f5';
+    const lines = wrap(ctx, last ? last.content : `Awaiting instruction, ${S.name}.`, W - 44);
+    const max = Math.floor((H - 70) / 21);
+    lines.slice(0, max).forEach((l, i) => ctx.fillText(l, 22, 60 + i * 21));
+    ctx.fillStyle = '#46d9ff'; ctx.fillRect(22, 60 + Math.min(lines.length, max) * 21 + 2, 10, 16);
+  },
+  notes(ctx, W, H) {
+    frame2d(ctx, W, H, 'SCRATCHPAD');
+    let paras = String(S.notes || '').split(/\n\s*\n/).map(s => s.trim()).filter(Boolean);
+    if (!paras.length) paras = ['Click to jot something down.'];
+    paras = paras.slice(0, 3);
+    const nw = (W - 80) / 3, nh = H - 90, rot = [-0.035, 0.025, -0.015];
+    paras.forEach((t, i) => {
+      ctx.save(); ctx.translate(20 + i * (nw + 20) + nw / 2, 66 + nh / 2); ctx.rotate(rot[i]);
+      ctx.fillStyle = 'rgba(255,181,71,.08)'; ctx.fillRect(-nw / 2, -nh / 2, nw, nh);
+      ctx.strokeStyle = 'rgba(255,181,71,.8)'; ctx.lineWidth = 2; ctx.strokeRect(-nw / 2, -nh / 2, nw, nh);
+      ctx.fillStyle = '#ffb547'; ctx.beginPath(); ctx.arc(0, -nh / 2 + 12, 5, 0, Math.PI * 2); ctx.fill();
+      ctx.font = F(400, 13); ctx.fillStyle = '#ffe2b0';
+      const ls = wrap(ctx, t, nw - 20), mx = Math.floor((nh - 40) / 18);
+      ls.slice(0, mx).forEach((l, k) => ctx.fillText(l, -nw / 2 + 10, -nh / 2 + 28 + k * 18));
+      ctx.restore();
+    });
+  },
+  poster(ctx, W, H) {
+    ctx.textBaseline = 'top'; ctx.fillStyle = '#04101d'; ctx.fillRect(0, 0, W, H);
+    ctx.strokeStyle = 'rgba(70,217,255,.6)'; ctx.lineWidth = 2; ctx.strokeRect(10, 10, W - 20, H - 20);
+    ctx.strokeStyle = 'rgba(70,217,255,.25)';
+    [60, 90, 120].forEach(r => { ctx.beginPath(); ctx.arc(W - 120, H / 2, r, 0, Math.PI * 2); ctx.stroke(); });
+    ctx.beginPath(); ctx.moveTo(W - 260, H / 2); ctx.lineTo(W - 10, H / 2); ctx.moveTo(W - 120, 20); ctx.lineTo(W - 120, H - 20); ctx.stroke();
+    ctx.fillStyle = '#46d9ff'; ctx.font = F(600, 58); ctx.fillText('NOMAD', 34, 46);
+    ctx.font = F(400, 18); ctx.fillStyle = '#7f93ad'; ctx.fillText('I N D U S T R I E S', 38, 116);
+    ctx.fillStyle = '#ffb547'; ctx.font = F(600, 16); ctx.fillText('MOVE FREELY. LIVE FULLY.', 38, H - 64);
   }
-  $('taskAdd').onclick = () => { const v = $('taskIn').value.trim(); if (v) { addTask(v); $('taskIn').value = ''; } };
-  $('taskIn').addEventListener('keydown', e => { if (e.key === 'Enter') $('taskAdd').click(); });
+};
+function drawScreen(key) { const s = screens[key]; if (!s) return; DRAW[key](s.ctx, s.W, s.H); s.tex.needsUpdate = true; }
+function refreshScreens() { Object.keys(screens).forEach(drawScreen); }
 
-  // ---------- focus timer ----------
-  let running = false, onBreak = false, remaining = S.focusLen[0] * 60, timerId = null, endAt = 0;
-  function fmt(s) { return String(Math.floor(s / 60)).padStart(2, '0') + ':' + String(s % 60).padStart(2, '0'); }
-  function renderTimer() {
-    $('timer').textContent = fmt(remaining); $('timer').classList.toggle('brk', onBreak);
-    $('mode').textContent = onBreak ? 'Break' : 'Work';
-    $('tStart').textContent = running ? 'Pause' : 'Start';
-    $('sessions').textContent = `${S.sessions.n} session${S.sessions.n === 1 ? '' : 's'} today`;
-    document.title = running ? `${fmt(remaining)} · Nomad` : 'Nomad Workstation';
+/* =================== 3D ROOM =================== */
+function initScene() {
+  if (T) return true;
+  if (!window.THREE) return false;
+  const cv = $('scene');
+  let renderer;
+  try { renderer = new THREE.WebGLRenderer({ canvas: cv, antialias: true, powerPreference: 'low-power' }); } catch (e) { return false; }
+  if (!renderer.getContext()) return false;
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.5));
+  renderer.setSize(innerWidth, innerHeight, false);
+  renderer.setClearColor(0x06101c, 1);
+  const scene = new THREE.Scene(); scene.fog = new THREE.Fog(0x06101c, 5.5, 11.5);
+  const camera = new THREE.PerspectiveCamera(42, innerWidth / innerHeight, 0.05, 40);
+  const C = { line: 0x3fa9f5, dim: 0x15304d, fill: 0x081626, hi: 0xffb547, cyan: 0xb8f4ff };
+  const V = (x, y, z) => new THREE.Vector3(x, y, z);
+  const fill = new THREE.MeshBasicMaterial({ color: C.fill, polygonOffset: true, polygonOffsetFactor: 1, polygonOffsetUnits: 1 });
+  const lineMat = new THREE.LineBasicMaterial({ color: C.line, transparent: true, opacity: 0.7 });
+  const dimMat = new THREE.LineBasicMaterial({ color: C.dim });
+  const hot = [], hotMats = {}, views = {};
+  const newLine = () => new THREE.LineBasicMaterial({ color: C.line });
+
+  function solid(geo, lm) { const g = new THREE.Group(); g.add(new THREE.Mesh(geo, fill)); g.add(new THREE.LineSegments(new THREE.EdgesGeometry(geo, 25), lm || lineMat)); return g; }
+  function box(par, w, h, d, x, y, z, lm) { const g = solid(new THREE.BoxGeometry(w, h, d), lm); g.position.set(x, y, z); par.add(g); return g; }
+  function cyl(par, rt, rb, h, x, y, z, lm, seg) { const g = solid(new THREE.CylinderGeometry(rt, rb, h, seg || 14), lm); g.position.set(x, y, z); par.add(g); return g; }
+  function poly(par, pts, lm) { const l = new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts.map(p => V(p[0], p[1], p[2]))), lm || lineMat); par.add(l); return l; }
+  function gridPlane(w, h, step) {
+    const pos = [];
+    for (let x = -w / 2; x <= w / 2 + 1e-6; x += step) pos.push(x, -h / 2, 0, x, h / 2, 0);
+    for (let y = -h / 2; y <= h / 2 + 1e-6; y += step) pos.push(-w / 2, y, 0, w / 2, y, 0);
+    const geo = new THREE.BufferGeometry(); geo.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
+    return new THREE.LineSegments(geo, dimMat);
   }
-  function toggleTimer() {
-    running = !running;
-    if (running) {
-      endAt = Date.now() + remaining * 1000;
-      timerId = setInterval(() => {
-        remaining = Math.max(0, Math.round((endAt - Date.now()) / 1000));
-        if (remaining === 0) {
-          if (!onBreak) { S.sessions.n++; save(); say(`Session complete, ${S.name}. Take ${S.focusLen[1]}.`); }
-          else say('Break over. Back to it.');
-          onBreak = !onBreak; remaining = S.focusLen[onBreak ? 1 : 0] * 60; endAt = Date.now() + remaining * 1000;
-          renderHome();
-        }
-        renderTimer();
-      }, 500);
-    } else clearInterval(timerId);
+  function hotspot(key, obj, lm) { obj.traverse(o => { if (o.isMesh) { o.userData.hotspot = key; hot.push(o); } }); if (lm) (hotMats[key] = hotMats[key] || []).push(lm); }
+  function makeScreen(key, w, h, px) {
+    const W = px || 512, H = Math.round(W * h / w);
+    const canvas = document.createElement('canvas'); canvas.width = W; canvas.height = H;
+    const tex = new THREE.CanvasTexture(canvas); tex.minFilter = THREE.LinearFilter; tex.generateMipmaps = false;
+    const mesh = new THREE.Mesh(new THREE.PlaneGeometry(w, h), new THREE.MeshBasicMaterial({ map: tex, fog: false }));
+    screens[key] = { ctx: canvas.getContext('2d'), tex, W, H };
+    return mesh;
+  }
+  let seed = 7; const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+
+  // --- room shell: floor + two walls, blueprint grid ---
+  const floor = gridPlane(6, 5, 0.25); floor.rotation.x = -Math.PI / 2; scene.add(floor);
+  const back = gridPlane(6, 3, 0.25); back.position.set(0, 1.5, -2.5); scene.add(back);
+  const left = gridPlane(5, 3, 0.25); left.rotation.y = Math.PI / 2; left.position.set(-3, 1.5, 0); scene.add(left);
+  poly(scene, [[-3, 0, 2.5], [-3, 0, -2.5], [3, 0, -2.5], [3, 3, -2.5], [-3, 3, -2.5], [-3, 3, 2.5], [-3, 0, 2.5]]);
+  poly(scene, [[-3, 0, -2.5], [-3, 3, -2.5]]); poly(scene, [[3, 0, -2.5], [3, 0, 2.5]], dimMat);
+  // window on left wall
+  poly(scene, [[-2.99, 1.0, 1.3], [-2.99, 2.15, 1.3], [-2.99, 2.15, 2.3], [-2.99, 1.0, 2.3], [-2.99, 1.0, 1.3]]);
+  poly(scene, [[-2.99, 1.575, 1.3], [-2.99, 1.575, 2.3]]); poly(scene, [[-2.99, 1.0, 1.8], [-2.99, 2.15, 1.8]]);
+  // rug
+  const rug = []; for (let a = 0; a <= 64; a++) { const t = a / 64 * Math.PI * 2; rug.push([0.2 + Math.cos(t) * 1.3, 0.003, -1.0 + Math.sin(t) * 0.85]); } poly(scene, rug, dimMat);
+
+  // --- desk ---
+  box(scene, 2.6, 0.05, 0.85, 0, 0.75, -2.05);
+  [[-1.25, -1.67], [-1.25, -2.43]].forEach(([x, z]) => box(scene, 0.05, 0.73, 0.05, x, 0.365, z));
+  box(scene, 0.5, 0.72, 0.8, 1.02, 0.36, -2.05);                                   // drawer unit
+  [0.15, 0.39, 0.6].forEach(y => poly(scene, [[0.8, y, -1.645], [1.24, y, -1.645]]));
+  const tower = box(scene, 0.2, 0.46, 0.46, -0.95, 0.23, -2.08);                   // PC tower
+  const led = new THREE.Mesh(new THREE.BoxGeometry(0.025, 0.025, 0.01), new THREE.MeshBasicMaterial({ color: 0x46d9ff, fog: false }));
+  led.position.set(-0.95, 0.4, -1.845); scene.add(led);
+  poly(scene, [[-1.02, 0.12, -1.85], [-0.88, 0.12, -1.85]], dimMat);
+
+  // --- monitors ---
+  function monitor(key, w, h, x, y, z, ry, rx) {
+    const lm = newLine(); const g = new THREE.Group(); g.position.set(x, y, z); g.rotation.set(rx || 0, ry || 0, 0, 'YXZ'); scene.add(g);
+    box(g, w + 0.04, h + 0.04, 0.03, 0, 0, 0, lm);
+    const scr = makeScreen(key, w, h); scr.position.z = 0.016; g.add(scr);
+    const nh = y - h / 2 - 0.775;
+    box(g, 0.04, nh, 0.03, 0, -h / 2 - nh / 2, -0.03, lm);
+    box(g, 0.24, 0.012, 0.16, 0, 0.775 - y + 0.006, -0.02, lm);
+    hotspot(key, g, lm); return scr;
+  }
+  const sApps = monitor('apps', 0.92, 0.52, 0, 1.16, -2.27, 0);
+  const sTasks = monitor('tasks', 0.6, 0.36, -0.86, 1.08, -2.12, 0.5);
+  const sFocus = monitor('focus', 0.6, 0.36, 0.86, 1.08, -2.12, -0.5);
+  const sStatus = monitor('status', 0.78, 0.42, 0, 1.73, -2.35, 0, 0.1);
+
+  // --- laptop (console) ---
+  const llm = newLine(); const lg = new THREE.Group(); lg.position.set(0.72, 0.775, -1.82); lg.rotation.y = -0.35; scene.add(lg);
+  box(lg, 0.34, 0.016, 0.24, 0, 0.008, 0, llm);
+  const hinge = new THREE.Group(); hinge.position.set(0, 0.016, -0.12); hinge.rotation.x = -0.28; lg.add(hinge);
+  box(hinge, 0.34, 0.22, 0.012, 0, 0.11, 0, llm);
+  const sChat = makeScreen('chat', 0.31, 0.19, 400); sChat.position.set(0, 0.11, 0.0065); hinge.add(sChat);
+  hotspot('chat', lg, llm);
+
+  // --- desk clutter ---
+  box(scene, 0.44, 0.02, 0.14, -0.05, 0.785, -1.78);
+  for (let i = 0; i < 12; i++) poly(scene, [[-0.25 + i * 0.035, 0.796, -1.83], [-0.25 + i * 0.035, 0.796, -1.73]], dimMat);
+  box(scene, 0.06, 0.02, 0.1, 0.3, 0.785, -1.74);
+  cyl(scene, 0.04, 0.035, 0.1, -0.52, 0.825, -1.76);                                  // mug
+  poly(scene, [[-0.48, 0.85, -1.76], [-0.45, 0.84, -1.76], [-0.45, 0.8, -1.76], [-0.48, 0.79, -1.76]]);
+  [[0.24, 0.05, 0.17], [0.22, 0.04, 0.16], [0.2, 0.06, 0.15], [0.23, 0.035, 0.17]].reduce((y, [w, h, d], i) => { const b = box(scene, w, h, d, -1.08, y + h / 2, -2.28); b.rotation.y = (i % 2 ? 0.12 : -0.08); return y + h; }, 0.775);
+  [[-0.32, -1.95, 0.3], [-0.26, -1.92, -0.2], [0.42, -2.0, 0.15]].forEach(([x, z, r]) => { const p = box(scene, 0.21, 0.003, 0.29, x, 0.778, z, dimMat); p.rotation.y = r; });
+  cyl(scene, 0.07, 0.08, 0.02, -1.18, 0.785, -2.38);                                  // lamp (tucked behind the books)
+  poly(scene, [[-1.18, 0.79, -2.38], [-1.22, 1.3, -2.4], [-1.05, 1.42, -2.3]]);
+  const shade = cyl(scene, 0.02, 0.08, 0.1, -1.03, 1.37, -2.28); shade.rotation.z = 0.5;
+  poly(scene, [[0, 0.9, -2.3], [0.05, 0.55, -2.42], [0.2, 0.02, -2.44], [0.9, 0.02, -2.42]], dimMat);   // cables
+  poly(scene, [[-0.86, 0.95, -2.2], [-0.8, 0.5, -2.4], [-0.95, 0.46, -2.3]], dimMat);
+  poly(scene, [[0.86, 0.95, -2.2], [0.7, 0.5, -2.42], [0.75, 0.02, -2.44]], dimMat);
+
+  // --- chair ---
+  const ch = new THREE.Group(); ch.position.set(0.15, 0, -1.05); ch.rotation.y = 0.25; scene.add(ch);
+  cyl(ch, 0.3, 0.3, 0.03, 0, 0.05, 0, null, 5); cyl(ch, 0.025, 0.025, 0.42, 0, 0.27, 0, null, 8);
+  box(ch, 0.5, 0.07, 0.48, 0, 0.5, 0); box(ch, 0.48, 0.6, 0.05, 0, 0.86, 0.24);
+  box(ch, 0.04, 0.03, 0.3, -0.27, 0.68, 0.02); box(ch, 0.04, 0.03, 0.3, 0.27, 0.68, 0.02);
+
+  // --- shelves + books on left wall ---
+  [1.25, 1.72].forEach((y, s) => {
+    box(scene, 0.3, 0.03, 1.6, -2.84, y, -1.2);
+    poly(scene, [[-2.99, y - 0.12, -1.85], [-2.75, y - 0.015, -1.85]], dimMat);
+    poly(scene, [[-2.99, y - 0.12, -0.55], [-2.75, y - 0.015, -0.55]], dimMat);
+    let z = -1.95;
+    while (z < (s ? -0.75 : -0.9)) {
+      const w = 0.03 + rnd() * 0.04, h = 0.17 + rnd() * 0.12;
+      const b = box(scene, 0.2, h, w, -2.86, y + 0.015 + h / 2, z + w / 2); if (rnd() > 0.85) b.rotation.x = 0.18;
+      z += w + 0.004;
+    }
+  });
+  cyl(scene, 0.07, 0.05, 0.12, -2.84, 1.325, -0.6);                                  // plant
+  const leaves = solid(new THREE.IcosahedronGeometry(0.13, 0)); leaves.position.set(-2.84, 1.5, -0.6); scene.add(leaves);
+  box(scene, 0.22, 0.16, 0.26, -2.84, 1.815, -0.62);                                 // storage box
+
+  // --- floor clutter ---
+  box(scene, 0.46, 0.4, 0.46, 2.3, 0.2, -2.05); const bx = box(scene, 0.34, 0.28, 0.34, 2.26, 0.54, -2.1); bx.rotation.y = 0.3;
+  const db = new THREE.Group(); db.position.set(1.15, 0.06, -0.9); db.rotation.y = 0.6; scene.add(db);
+  const hnd = cyl(db, 0.015, 0.015, 0.36, 0, 0, 0, null, 8); hnd.rotation.z = Math.PI / 2;
+  [-0.14, 0.14].forEach(x => { const pl = cyl(db, 0.06, 0.06, 0.05, x, 0, 0, null, 12); pl.rotation.z = Math.PI / 2; });
+
+  // --- pinboard (notes) + poster ---
+  const plm = newLine(); const pg = new THREE.Group(); pg.position.set(2.05, 1.55, -2.47); scene.add(pg);
+  box(pg, 1.1, 0.75, 0.025, 0, 0, 0, plm);
+  const sNotes = makeScreen('notes', 1.04, 0.69, 512); sNotes.position.z = 0.014; pg.add(sNotes);
+  hotspot('notes', pg, plm);
+  const sPoster = makeScreen('poster', 1.0, 0.6, 512); sPoster.position.set(-2.985, 2.05, 0.4); sPoster.rotation.y = Math.PI / 2; scene.add(sPoster);
+
+  // --- spine on a clinic stand ---
+  cyl(scene, 0.2, 0.22, 0.02, -1.95, 0.01, -1.45, null, 24);
+  cyl(scene, 0.012, 0.012, 0.86, -1.95, 0.44, -1.45, null, 8);
+  const spine = new THREE.Group(); spine.position.set(-1.95, 0.86, -1.45); scene.add(spine);
+  const spec = [];
+  for (let i = 0; i < 7; i++) spec.push({ r: 0.03, h: 0.022, g: 0.008 });
+  for (let i = 0; i < 12; i++) spec.push({ r: 0.036 + i * 0.0012, h: 0.028 + i * 0.0006, g: 0.009 });
+  for (let i = 0; i < 5; i++) spec.push({ r: 0.048 + i * 0.002, h: 0.037, g: 0.011 });
+  spec.push({ r: 0.055, rb: 0.02, h: 0.15, g: 0.006 }, { r: 0.016, rb: 0.005, h: 0.05, g: 0 });
+  const total = spec.reduce((a, s) => a + s.h + s.g, 0);
+  const curve = t => t < 0.18 ? 0.035 * Math.sin(Math.PI * t / 0.18)
+    : t < 0.6 ? -0.05 * Math.sin(Math.PI * (t - 0.18) / 0.42)
+    : t < 0.82 ? 0.045 * Math.sin(Math.PI * (t - 0.6) / 0.22)
+    : -0.08 * ((t - 0.82) / 0.18);
+  const vertMats = [];
+  let y = total;
+  spec.forEach((s, i) => {
+    y -= s.h / 2;
+    const lm = newLine(); vertMats.push(lm);
+    const vg = new THREE.Group(); vg.position.set(0, y, curve((total - y) / total)); spine.add(vg);
+    vg.add(solid(new THREE.CylinderGeometry(s.r, s.rb || s.r, s.h, 12), lm));
+    if (i < 24) {
+      const sp = i === 0 ? 0.35 : i < 7 ? 0.9 : i < 19 ? 1.25 : 1.0;
+      const spn = box(vg, 0.012, s.h * 0.7, s.r * sp, 0, i >= 7 && i < 19 ? -s.h * 0.25 : 0, -(s.r + s.r * sp / 2), lm);
+      if (i >= 7 && i < 19) spn.rotation.x = 0.35;
+      box(vg, s.r * (i < 7 ? 2.4 : 2.7), s.h * 0.45, 0.014, 0, 0, -s.r * 0.55, lm);
+    }
+    if (i === 24) vg.rotation.x = -0.45;
+    vg.traverse(o => { if (o.isMesh) { o.userData.hotspot = 'spine'; o.userData.vert = i; hot.push(o); } });
+    y -= s.h / 2 + s.g;
+  });
+
+  // --- camera views for each station ---
+  scene.updateMatrixWorld(true);
+  function viewFor(obj, dist, lift) {
+    const p = obj.getWorldPosition(V(0, 0, 0)); const n = V(0, 0, 1).transformDirection(obj.matrixWorld);
+    return { pos: p.clone().addScaledVector(n, dist).add(V(0, lift || 0.03, 0)), tgt: p };
+  }
+  views.apps = viewFor(sApps, 1.25); views.tasks = viewFor(sTasks, 1.0); views.focus = viewFor(sFocus, 1.0);
+  views.status = viewFor(sStatus, 1.1); views.chat = viewFor(sChat, 0.55, 0.02); views.notes = viewFor(sNotes, 1.3);
+  views.spine = { pos: V(-1.05, 1.45, 0.1), tgt: V(-1.95, 1.4, -1.45) };
+
+  T = { renderer, scene, camera, C, hot, hotMats, views, vertMats, spine, led,
+        orbit: { az: 0.55, pitch: 0.28, r: innerWidth < 760 ? 5.2 : 3.9, tgt: V(0.1, 1.0, -1.45) },
+        ray: new THREE.Raycaster(), ptr: new THREE.Vector2(-9, -9), px: 0, py: 0, needHover: false };
+  const d0 = desired(); T.cur = { pos: d0.pos.clone().add(V(1.2, 0.8, 1.8)), tgt: d0.tgt.clone() };
+
+  // --- interaction ---
+  const drag = T.drag = { down: null, active: false };
+  function setPtr(e) { T.ptr.set((e.clientX / innerWidth) * 2 - 1, -(e.clientY / innerHeight) * 2 + 1); T.px = e.clientX; T.py = e.clientY; T.needHover = true; }
+  cv.addEventListener('pointerdown', e => {
+    setPtr(e); drag.down = { x: e.clientX, y: e.clientY, az: T.orbit.az, p: T.orbit.pitch, rot: T.spine.rotation.y }; drag.active = false;
+    try { cv.setPointerCapture(e.pointerId); } catch (_) {}
+  });
+  cv.addEventListener('pointermove', e => {
+    setPtr(e);
+    if (!drag.down) return;
+    const dx = e.clientX - drag.down.x, dy = e.clientY - drag.down.y;
+    if (Math.abs(dx) + Math.abs(dy) > 5) drag.active = true;
+    if (!drag.active) return;
+    if (mode === 'spine') T.spine.rotation.y = drag.down.rot + dx * 0.012;
+    else if (mode === 'overview') { T.orbit.az = clamp(drag.down.az - dx * 0.004, -0.5, 1.1); T.orbit.pitch = clamp(drag.down.p + dy * 0.003, 0.06, 0.7); }
+  });
+  cv.addEventListener('pointerup', () => { if (drag.down && !drag.active) sceneClick(); drag.down = null; drag.active = false; });
+  cv.addEventListener('pointerleave', () => { $('tip').classList.remove('show'); });
+  cv.addEventListener('wheel', e => { if (mode === 'overview') { T.orbit.r = clamp(T.orbit.r + e.deltaY * 0.002, 2.2, 5.6); e.preventDefault(); } }, { passive: false });
+  addEventListener('resize', () => { T.renderer.setSize(innerWidth, innerHeight, false); T.camera.aspect = innerWidth / innerHeight; updateViewOffset(); });
+
+  requestAnimationFrame(loop);
+  return true;
+}
+function desired() {
+  if (mode !== 'overview' && T.views[mode]) return T.views[mode];
+  const o = T.orbit, cp = Math.cos(o.pitch);
+  return { pos: new THREE.Vector3(o.tgt.x + o.r * cp * Math.sin(o.az), o.tgt.y + o.r * Math.sin(o.pitch), o.tgt.z + o.r * cp * Math.cos(o.az)), tgt: o.tgt };
+}
+let lastT = 0;
+function loop(t) {
+  requestAnimationFrame(loop);
+  if (document.hidden || document.body.classList.contains('lite')) return;
+  if (t - lastT < 30) return;             // ~30 fps cap keeps the fans quiet
+  lastT = t;
+  const d = desired();
+  T.cur.pos.lerp(d.pos, 0.08); T.cur.tgt.lerp(d.tgt, 0.08);
+  T.camera.position.copy(T.cur.pos); T.camera.lookAt(T.cur.tgt);
+  if (mode !== 'spine' && !T.drag.active) T.spine.rotation.y += 0.005;
+  T.led.visible = Math.floor(t / 800) % 2 === 0;
+  if (T.needHover) { T.needHover = false; doHover(); }
+  T.renderer.render(T.scene, T.camera);
+}
+function doHover() {
+  T.ray.setFromCamera(T.ptr, T.camera);
+  const hit = T.ray.intersectObjects(T.hot, false)[0];
+  const u = hit ? hit.object.userData : {};
+  const key = u.hotspot || null;
+  if (key !== hoverKey) {
+    if (hoverKey && T.hotMats[hoverKey]) T.hotMats[hoverKey].forEach(m => m.color.setHex(T.C.line));
+    if (key && T.hotMats[key]) T.hotMats[key].forEach(m => m.color.setHex(T.C.hi));
+    hoverKey = key;
+  }
+  hoverVert = key === 'spine' ? (mode === 'spine' ? u.vert : -2) : -1;
+  paintSpine();
+  $('scene').classList.toggle('pointer', !!key);
+  const tip = $('tip');
+  if (key) {
+    tip.textContent = key === 'spine' ? (mode === 'spine' ? VN[u.vert] : 'SPINE MODEL') : LABEL(key).toUpperCase();
+    tip.style.left = (T.px + 14) + 'px'; tip.style.top = (T.py + 14) + 'px'; tip.classList.add('show');
+  } else tip.classList.remove('show');
+}
+function paintSpine() {
+  if (!T) return;
+  T.vertMats.forEach((m, i) => m.color.setHex(i === selVert ? T.C.hi : (hoverVert === -2 || hoverVert === i) ? T.C.cyan : T.C.line));
+}
+function sceneClick() {
+  doHover();
+  if (!hoverKey) return;
+  if (hoverKey === 'spine') { if (mode !== 'spine') focus('spine'); else if (hoverVert >= 0) selectVert(hoverVert); }
+  else focus(hoverKey);
+}
+function updateViewOffset() {
+  if (!T) return;
+  const open = $('panel').classList.contains('show');
+  if (open && innerWidth > 900) T.camera.setViewOffset(innerWidth, innerHeight, 210, 0, innerWidth, innerHeight);
+  else T.camera.clearViewOffset();
+  T.camera.updateProjectionMatrix();
+}
+
+/* =================== STATIONS / PANELS =================== */
+function focus(key) {
+  if (key === 'settings') key = 'status';
+  mode = key;
+  $('panel').classList.add('show'); document.body.classList.add('panel-open');
+  $('pTitle').textContent = LABEL(key);
+  renderPanel(key); updateViewOffset(); updateHint();
+  if (T) T.needHover = true;
+}
+function back() {
+  mode = 'overview';
+  $('panel').classList.remove('show'); document.body.classList.remove('panel-open');
+  updateViewOffset(); updateHint(); paintSpine();
+}
+$('pClose').onclick = back;
+$('sysBtn').onclick = () => focus('status');
+document.querySelectorAll('.station').forEach(b => b.onclick = () => focus(b.dataset.k));
+function updateHint() {
+  $('hint').textContent = document.body.classList.contains('lite') ? '' :
+    mode === 'overview' ? 'DRAG TO LOOK · SCROLL TO ZOOM · CLICK A SCREEN' :
+    mode === 'spine' ? 'DRAG TO ROTATE · CLICK A VERTEBRA · ESC TO STEP BACK' : 'ESC OR ✕ TO STEP BACK';
+}
+
+function renderPanel(key) {
+  const b = $('pBody');
+  if (key === 'apps') {
+    b.innerHTML = `<div class="apps" id="appsList"></div><button id="addApp" class="wide">+ Add app</button>
+      <p class="hint">Click an app to open it. ↗ opens it in its own tab, ✎ edits, ✕ removes.</p>`;
+    $('addApp').onclick = () => editApp(null); renderAppsList();
+  } else if (key === 'tasks') {
+    b.innerHTML = `<div class="addrow"><input id="taskIn" placeholder="Add a task, press Enter"><button id="taskAdd">+</button></div><ul class="tasks" id="tasks"></ul>`;
+    $('taskAdd').onclick = () => { const v = $('taskIn').value.trim(); if (v) { addTask(v); $('taskIn').value = ''; $('taskIn').focus(); } };
+    $('taskIn').onkeydown = e => { if (e.key === 'Enter') $('taskAdd').click(); };
+    renderTasks(); setTimeout(() => $('taskIn') && $('taskIn').focus(), 350);
+  } else if (key === 'focus') {
+    b.innerHTML = `<div class="timer" id="timer"></div><div class="trow">
+      <button id="tStart">Start</button><button id="tReset">Reset</button>
+      <button id="t25">25/5</button><button id="t50">50/10</button></div><div class="count" id="sessions"></div>
+      <p class="hint">Or say "${pName()}, start focus".</p>`;
+    $('tStart').onclick = toggleTimer;
+    $('tReset').onclick = () => { if (running) toggleTimer(); onBreak = false; remaining = S.focusLen[0] * 60; renderTimer(); };
+    $('t25').onclick = () => setLen(25, 5); $('t50').onclick = () => setLen(50, 10);
     renderTimer();
+  } else if (key === 'notes') {
+    b.innerHTML = `<textarea class="notes" id="notes" placeholder="Quick notes. Leave a blank line between ideas and each one gets its own card on the pinboard."></textarea>`;
+    $('notes').value = S.notes;
+    let nt; $('notes').oninput = () => { clearTimeout(nt); nt = setTimeout(() => { S.notes = $('notes').value; save(); drawScreen('notes'); }, 400); };
+  } else if (key === 'chat') {
+    b.innerHTML = (S.ollama.model ? '' : `<div class="notice">No language model is linked yet, ${esc(S.name)}.<button id="goSys">Open Systems</button></div>`) +
+      `<div class="chatlog" id="chatlog"></div><div class="row"><button id="chatClear">Clear conversation</button></div>
+       <p class="hint">Type in the bar below, or say "${pName()}, …". Commands like "open Odonta" still work here.</p>`;
+    if ($('goSys')) $('goSys').onclick = () => focus('status');
+    $('chatClear').onclick = () => { S.chat = []; save(); renderChat(); drawScreen('chat'); };
+    renderChat(); setTimeout(() => $('cmdIn').focus(), 350);
+  } else if (key === 'spine') {
+    const v = selVert >= 0 ? vertInfo(selVert) : null;
+    b.innerHTML = `<div class="vinfo">${v ? `<div class="rg">${v.region}</div><h4>${v.title}</h4><p>${esc(v.text)}</p><p class="nv">${esc(v.nerve)}</p>`
+      : `<div class="rg">Spine model</div><h4>Select a vertebra</h4><p>Click one on the model, or pick from the list below.</p>`}</div>
+      ${REGIONS.map(r => `<div class="reg"><div class="rl">${r.name}</div><div class="chips">${r.idx.map(i => `<button data-v="${i}" class="${i === selVert ? 'on' : ''}">${VN[i]}</button>`).join('')}</div></div>`).join('')}
+      <p class="hint">Drag the model to rotate it. Or say "${pName()}, show C5".</p>`;
+    b.querySelectorAll('[data-v]').forEach(x => x.onclick = () => selectVert(+x.dataset.v));
+  } else if (key === 'status') {
+    const modelOpts = [...new Set([...models, S.ollama.model].filter(Boolean))];
+    b.innerHTML = `
+      <div class="sec"><div class="sl">Address</div><input id="sName" value="${esc(S.name)}"></div>
+      <div class="sec"><div class="sl">Voices</div>
+        <label>Nate</label><div class="row"><select id="vNate"></select><button data-test="nate" title="Preview">▶</button></div>
+        <label>Nat</label><div class="row"><select id="vNat"></select><button data-test="nat" title="Preview">▶</button></div>
+        <label class="chk"><input type="checkbox" id="speakT" ${S.speak ? 'checked' : ''}> Read replies aloud</label>
+        <p class="hint">Your choice and the last persona you used are remembered between launches.</p></div>
+      <div class="sec"><div class="sl">Ollama</div>
+        <label>Address</label><div class="row"><input id="oUrl" value="${esc(S.ollama.url)}"><button id="oTest">Test</button></div>
+        <p class="hint" id="oMsg">${esc(ollamaMsg)}</p>
+        <label>Model</label><select id="oModel">${modelOpts.length ? modelOpts.map(m => `<option ${m === S.ollama.model ? 'selected' : ''}>${esc(m)}</option>`).join('') : '<option value="">None found yet. Press Test</option>'}</select>
+        <p class="hint">This page's address is <code>${esc(location.origin)}</code>. Ollama must be told to allow it.</p></div>
+      <div class="sec"><div class="sl">Display</div><label class="chk"><input type="checkbox" id="liteT" ${S.lite ? 'checked' : ''}> Lite mode (no 3D room)</label></div>
+      <div class="sec"><div class="sl">Backup</div><div class="row"><button id="exportBtn">Export</button><button id="importBtn">Import</button>
+        <input type="file" id="importFile" accept="application/json" hidden></div></div>
+      <div class="sec"><div class="sl">Voice commands</div><p class="hint">Press 🎙, then: "Nate, open Odonta" · "Nat, add task call the landlord" · "Nate, start focus" · "Nat, stop" · "Nate, brief me" · "Nat, show L5" · "Nate, go home" · anything else goes to Ollama.</p></div>`;
+    fillVoiceSelects();
+    $('sName').onchange = () => { S.name = $('sName').value.trim() || 'sir'; save(); refreshScreens(); };
+    b.querySelectorAll('[data-test]').forEach(x => x.onclick = () => { const p = x.dataset.test; say(`${pName(p)} here, ${S.name}. All systems nominal.`, p); });
+    $('vNate').onchange = () => { S.voices.nate = $('vNate').value; save(); say(`Nate here, ${S.name}.`, 'nate'); };
+    $('vNat').onchange = () => { S.voices.nat = $('vNat').value; save(); say(`Nat here, ${S.name}.`, 'nat'); };
+    $('speakT').onchange = () => { S.speak = $('speakT').checked; save(); };
+    $('oUrl').onchange = () => { S.ollama.url = $('oUrl').value.trim() || defaults.ollama.url; save(); };
+    $('oTest').onclick = () => { S.ollama.url = $('oUrl').value.trim() || defaults.ollama.url; save(); testOllama(false); };
+    $('oModel').onchange = () => { S.ollama.model = $('oModel').value; save(); setChip(chipState); };
+    $('liteT').onchange = () => { S.lite = $('liteT').checked; save(); applyLite(); };
+    $('exportBtn').onclick = exportBackup;
+    $('importBtn').onclick = () => $('importFile').click();
+    $('importFile').onchange = importBackup;
   }
-  function setLen(a, b, btn) {
-    S.focusLen = [a, b]; save();
-    $('t25').classList.toggle('on', a === 25); $('t50').classList.toggle('on', a === 50);
-    if (!running) { onBreak = false; remaining = a * 60; renderTimer(); }
-  }
-  $('tStart').onclick = toggleTimer;
-  $('tReset').onclick = () => { if (running) toggleTimer(); onBreak = false; remaining = S.focusLen[0] * 60; renderTimer(); };
-  $('t25').onclick = () => setLen(25, 5);
-  $('t50').onclick = () => setLen(50, 10);
-  setLen(S.focusLen[0], S.focusLen[1]);
+}
+function fillVoiceSelects() {
+  ['nate', 'nat'].forEach(p => {
+    const sel = $(p === 'nate' ? 'vNate' : 'vNat'); if (!sel) return;
+    sel.innerHTML = `<option value="">Auto (best match)</option>` +
+      voiceList.map(v => `<option value="${esc(v.name)}" ${v.name === S.voices[p] ? 'selected' : ''}>${esc(v.name)} · ${esc(v.lang)}</option>`).join('');
+  });
+}
 
-  // ---------- notes ----------
-  $('notes').value = S.notes;
-  let nt; $('notes').addEventListener('input', () => { clearTimeout(nt); nt = setTimeout(() => { S.notes = $('notes').value; save(); }, 400); });
+/* ---- apps ---- */
+function renderAppsList() {
+  drawScreen('apps');
+  const wrapEl = $('appsList'); if (!wrapEl) return;
+  wrapEl.innerHTML = '';
+  S.apps.forEach(a => {
+    const el = document.createElement('div'); el.className = 'tile';
+    el.innerHTML = `<div class="ic">${esc(a.icon || a.name[0])}</div>
+      <div class="nm">${esc(a.name)}<small>${a.url ? esc(a.url.replace(/^https?:\/\//, '')) : 'click to set address'}</small></div>
+      <button class="x" data-act="ext" title="Open in new tab">↗</button><button class="x" data-act="edit" title="Edit">✎</button><button class="x" data-act="del" title="Remove">✕</button>`;
+    el.onclick = e => {
+      const act = e.target.dataset.act;
+      if (act === 'del') { if (confirm(`Remove ${a.name}?`)) { S.apps = S.apps.filter(x => x.id !== a.id); save(); renderAppsList(); } return; }
+      if (act === 'edit') return editApp(a);
+      if (act === 'ext') { if (a.url) window.open(a.url, '_blank'); else editApp(a); return; }
+      openApp(a);
+    };
+    wrapEl.appendChild(el);
+  });
+}
+function openApp(a) {
+  if (!a.url) return editApp(a);
+  currentApp = a; $('avTitle').textContent = a.name.toUpperCase(); $('frame').src = a.url; $('appView').classList.add('show');
+}
+function closeApp() { if (!$('appView').classList.contains('show')) return; $('appView').classList.remove('show'); $('frame').src = 'about:blank'; currentApp = null; }
+$('avClose').onclick = closeApp;
+$('avPop').onclick = () => currentApp && window.open(currentApp.url, '_blank');
+let editing = null;
+function editApp(a) {
+  editing = a || null;
+  $('appModalTitle').textContent = a ? 'EDIT APP' : 'ADD APP';
+  $('aName').value = a ? a.name : ''; $('aUrl').value = a ? a.url : ''; $('aIcon').value = a ? a.icon : '';
+  $('appModal').classList.add('show'); setTimeout(() => (a ? $('aUrl') : $('aName')).focus(), 50);
+}
+$('aCancel').onclick = () => $('appModal').classList.remove('show');
+$('aSave').onclick = () => {
+  const name = $('aName').value.trim(); let url = $('aUrl').value.trim();
+  if (!name) return $('aName').focus();
+  if (url && !/^[a-z]+:\/\//i.test(url)) url = 'https://' + url;
+  const icon = $('aIcon').value.trim() || name.slice(0, 2);
+  if (editing) Object.assign(editing, { name, url, icon }); else S.apps.push({ id: 'a' + Date.now(), name, url, icon });
+  save(); renderAppsList(); $('appModal').classList.remove('show');
+};
+['aName', 'aUrl', 'aIcon'].forEach(id => $(id).addEventListener('keydown', e => { if (e.key === 'Enter') $('aSave').click(); }));
+$('appModal').addEventListener('click', e => { if (e.target === $('appModal')) $('appModal').classList.remove('show'); });
 
-  // ---------- settings / backup ----------
-  $('menuBtn').onclick = () => { $('sName').value = S.name; $('menuModal').classList.add('show'); };
-  $('mClose').onclick = () => { S.name = $('sName').value.trim() || 'sir'; save(); renderHome(); $('menuModal').classList.remove('show'); };
-  $('exportBtn').onclick = () => {
-    const blob = new Blob([JSON.stringify(S, null, 2)], { type: 'application/json' });
-    const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
-    a.download = `nomad-backup-${today()}.json`; a.click(); URL.revokeObjectURL(a.href);
-  };
-  $('importBtn').onclick = () => $('importFile').click();
-  $('importFile').onchange = e => {
-    const f = e.target.files[0]; if (!f) return;
-    f.text().then(t => { try { S = Object.assign({}, defaults, JSON.parse(t)); save(); boot(true); say('Backup restored.'); } catch (err) { alert('That file is not a Nomad backup.'); } });
-  };
-  document.querySelectorAll('.modal').forEach(m => m.addEventListener('click', e => { if (e.target === m) m.classList.remove('show'); }));
+/* ---- tasks ---- */
+function addTask(text) { S.tasks.push({ id: Date.now() + Math.random(), text, done: false }); save(); renderTasks(); }
+function renderTasks() {
+  drawScreen('tasks'); drawScreen('status');
+  const ul = $('tasks'); if (!ul) return;
+  ul.innerHTML = '';
+  S.tasks.forEach(t => {
+    const li = document.createElement('li'); if (t.done) li.className = 'done';
+    li.innerHTML = `<input type="checkbox" ${t.done ? 'checked' : ''}><span>${esc(t.text)}</span><button class="del" title="Delete">✕</button>`;
+    li.querySelector('input').onchange = e => { t.done = e.target.checked; save(); renderTasks(); };
+    li.querySelector('.del').onclick = () => { S.tasks = S.tasks.filter(x => x !== t); save(); renderTasks(); };
+    ul.appendChild(li);
+  });
+  if (!S.tasks.length) ul.innerHTML = '<li style="background:none;color:var(--dim)">Nothing yet.</li>';
+}
 
-  // ---------- boot ----------
-  function boot(silent) {
-    renderApps(); renderTasks(); renderTimer(); renderHome();
-    if (!silent) say(`${partOfDay()}, ${S.name}. Nomad is online. ${briefText()}`);
-  }
-  function engage() { $('boot').classList.add('gone'); boot(false); document.removeEventListener('keydown', onKey); }
-  function onKey(e) { if (e.key === 'Enter' || e.key === ' ') engage(); }
-  $('engage').onclick = engage; document.addEventListener('keydown', onKey);
-  renderApps(); renderTasks(); renderTimer(); renderHome();
+/* ---- focus timer ---- */
+function renderTimer() {
+  drawScreen('focus');
+  document.title = running ? `${fmt(remaining)} · Nomad` : 'Nomad Workstation';
+  if (!$('timer')) return;
+  $('timer').textContent = fmt(remaining); $('timer').classList.toggle('brk', onBreak);
+  $('tStart').textContent = running ? 'Pause' : 'Start';
+  $('t25').classList.toggle('on', S.focusLen[0] === 25); $('t50').classList.toggle('on', S.focusLen[0] === 50);
+  $('sessions').textContent = `${onBreak ? 'Break' : 'Work'} · ${S.sessions.n} session${S.sessions.n === 1 ? '' : 's'} today`;
+}
+function toggleTimer() {
+  running = !running;
+  if (running) {
+    endAt = Date.now() + remaining * 1000;
+    timerId = setInterval(() => {
+      remaining = Math.max(0, Math.round((endAt - Date.now()) / 1000));
+      if (remaining === 0) {
+        if (!onBreak) { S.sessions.n++; save(); say(`Session complete, ${S.name}. Take ${S.focusLen[1]}.`); }
+        else say('Break over. Back to it.');
+        onBreak = !onBreak; remaining = S.focusLen[onBreak ? 1 : 0] * 60; endAt = Date.now() + remaining * 1000;
+      }
+      renderTimer();
+    }, 500);
+  } else clearInterval(timerId);
+  renderTimer();
+}
+function setLen(a, b) { S.focusLen = [a, b]; save(); if (!running) { onBreak = false; remaining = a * 60; } renderTimer(); }
 
-  function escapeHtml(s) { return String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
+/* ---- chat render ---- */
+function renderChat() {
+  const log = $('chatlog'); if (!log) return;
+  log.innerHTML = S.chat.length ? S.chat.map(m => m.role === 'user'
+    ? `<div class="msg u">${esc(m.content)}</div>`
+    : `<div class="msg a"><span class="who">${m.p === 'nat' ? 'NAT' : 'NATE'}</span>${esc(m.content)}</div>`).join('')
+    : `<p class="hint">No conversation yet.</p>`;
+  $('pBody').scrollTop = $('pBody').scrollHeight;
+}
+function renderChatLive(text, p) {
+  const log = $('chatlog'); if (!log) return;
+  let el = $('liveMsg');
+  if (!el) { el = document.createElement('div'); el.id = 'liveMsg'; el.className = 'msg a'; log.appendChild(el); }
+  el.innerHTML = `<span class="who">${p === 'nat' ? 'NAT' : 'NATE'}</span>${esc(text)}`;
+  $('pBody').scrollTop = $('pBody').scrollHeight;
+}
+
+/* ---- backup ---- */
+function exportBackup() {
+  const blob = new Blob([JSON.stringify(S, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `nomad-backup-${today()}.json`; a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+}
+function importBackup(e) {
+  const f = e.target.files[0]; if (!f) return;
+  f.text().then(t => {
+    try { S = merge(JSON.parse(t)); save(); setPersona(S.persona); refreshScreens(); if (mode !== 'overview') renderPanel(mode); say('Backup restored.'); }
+    catch (err) { alert('That file is not a Nomad backup.'); }
+  });
+}
+
+/* ---- lite / 3D switch ---- */
+function applyLite() {
+  let lite = !!S.lite;
+  if (!lite && !T && !initScene()) lite = true;
+  document.body.classList.toggle('lite', lite);
+  if (!lite) { refreshScreens(); updateViewOffset(); }
+  updateHint();
+}
+
+/* ---- keyboard ---- */
+document.addEventListener('keydown', e => {
+  if (!$('boot').classList.contains('gone')) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); engage(); } return; }
+  const typing = /INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName);
+  if (e.key === 'Escape') {
+    if ($('appModal').classList.contains('show')) return $('appModal').classList.remove('show');
+    if ($('appView').classList.contains('show')) return closeApp();
+    if (typing) return document.activeElement.blur();
+    if (mode !== 'overview') back();
+  } else if (e.key === '/' && !typing) { e.preventDefault(); $('cmdIn').focus(); }
+});
+
+/* ---- clock ---- */
+let lastMin = '';
+function tick() {
+  const d = new Date();
+  $('clock').textContent = hm();
+  $('date').textContent = d.toLocaleDateString([], { weekday: 'long', day: 'numeric', month: 'long' });
+  const m = hm(); if (m !== lastMin) { lastMin = m; drawScreen('status'); }
+}
+
+/* ---- boot ---- */
+function engage() {
+  if ($('boot').classList.contains('gone')) return;
+  $('boot').classList.add('gone');
+  voicesReady.then(() => say(`${partOfDay()}, ${S.name}. ${pName()} online. ${briefText()}`));
+}
+$('engage').onclick = engage;
+
+setPersona(S.persona);
+applyLite();
+tick(); setInterval(tick, 1000);
+renderTimer(); setChip('off');
+if (document.fonts && document.fonts.ready) document.fonts.ready.then(refreshScreens);
+testOllama(true);
 })();
 </script>
 </body>
