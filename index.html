@@ -1,0 +1,509 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Nomad">
+<title>Nomad Workstation</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' rx='14' fill='%230b1320'/><circle cx='32' cy='32' r='18' fill='none' stroke='%2346d9ff' stroke-width='4'/><circle cx='32' cy='32' r='6' fill='%2346d9ff'/></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#070c14; --panel:#0d1624; --panel2:#111d2f; --line:#1d2d44;
+  --ink:#d8e6f5; --dim:#7f93ad; --accent:#46d9ff; --accent2:#ffb547;
+  --ok:#5be39b; --bad:#ff6b6b;
+  --mono:'JetBrains Mono',ui-monospace,Menlo,monospace;
+  --sans:'Inter',-apple-system,system-ui,sans-serif;
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%}
+body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:14px;
+  background-image:linear-gradient(var(--line) 1px,transparent 1px),linear-gradient(90deg,var(--line) 1px,transparent 1px);
+  background-size:40px 40px;background-position:-1px -1px;}
+body::before{content:"";position:fixed;inset:0;background:radial-gradient(ellipse at 50% 0%,rgba(70,217,255,.08),transparent 60%),rgba(7,12,20,.86);pointer-events:none}
+.app{position:relative;display:grid;grid-template-rows:auto 1fr;height:100vh}
+button,input,textarea,select{font:inherit;color:inherit}
+button{cursor:pointer;background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:6px 10px;transition:.15s}
+button:hover{border-color:var(--accent);color:var(--accent)}
+button.on{background:rgba(70,217,255,.12);border-color:var(--accent);color:var(--accent)}
+input,textarea{background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:7px 9px;width:100%}
+input:focus,textarea:focus{outline:none;border-color:var(--accent)}
+
+/* header */
+header{display:flex;align-items:center;gap:12px;padding:10px 16px;border-bottom:1px solid var(--line);background:rgba(13,22,36,.85);backdrop-filter:blur(6px);flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:10px;font-family:var(--mono);letter-spacing:.2em;font-weight:600}
+.core{width:26px;height:26px;border-radius:50%;border:2px solid var(--accent);display:grid;place-items:center;box-shadow:0 0 12px rgba(70,217,255,.5)}
+.core::after{content:"";width:8px;height:8px;border-radius:50%;background:var(--accent)}
+.core.live{animation:pulse 1.4s infinite}
+@keyframes pulse{50%{box-shadow:0 0 22px rgba(70,217,255,.9)}}
+.brand small{color:var(--dim);letter-spacing:.1em;font-weight:400;font-size:11px}
+.spacer{flex:1}
+.clock{font-family:var(--mono);font-size:18px;color:var(--accent)}
+.date{font-size:12px;color:var(--dim)}
+.persona{display:flex;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.persona button{border:0;border-radius:0}
+
+/* layout */
+main{display:grid;grid-template-columns:230px 1fr 290px;gap:12px;padding:12px;min-height:0}
+.panel{background:rgba(13,22,36,.92);border:1px solid var(--line);border-radius:12px;display:flex;flex-direction:column;min-height:0}
+.ph{display:flex;align-items:center;justify-content:space-between;padding:10px 12px;border-bottom:1px solid var(--line);font-family:var(--mono);font-size:11px;letter-spacing:.15em;color:var(--dim);text-transform:uppercase}
+.pb{padding:12px;overflow:auto;min-height:0}
+.side{display:flex;flex-direction:column;gap:12px;min-height:0}
+
+/* apps */
+.apps{display:flex;flex-direction:column;gap:6px}
+.tile{display:flex;align-items:center;gap:10px;padding:8px;border:1px solid var(--line);border-radius:10px;background:var(--panel2);cursor:pointer;position:relative}
+.tile:hover,.tile.active{border-color:var(--accent)}
+.tile .ic{width:30px;height:30px;border-radius:8px;display:grid;place-items:center;font-family:var(--mono);font-weight:600;background:rgba(70,217,255,.12);color:var(--accent);flex:none}
+.tile .nm{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tile .nm small{display:block;color:var(--dim);font-size:11px;overflow:hidden;text-overflow:ellipsis}
+.tile .x{opacity:0;border:0;background:none;padding:2px 4px;color:var(--dim)}
+.tile:hover .x{opacity:1}
+.hint{color:var(--dim);font-size:12px;line-height:1.5}
+
+/* center */
+.center{position:relative;overflow:hidden}
+.viewbar{display:none;align-items:center;gap:8px;padding:8px 12px;border-bottom:1px solid var(--line)}
+.viewbar.show{display:flex}
+.viewbar .t{flex:1;font-family:var(--mono);font-size:12px;color:var(--accent)}
+iframe{flex:1;border:0;width:100%;background:#fff;border-radius:0 0 12px 12px;display:none}
+iframe.show{display:block}
+.home{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:24px;text-align:center}
+.home.hide{display:none}
+.big{font-family:var(--mono);font-size:clamp(40px,7vw,84px);color:var(--accent);text-shadow:0 0 30px rgba(70,217,255,.35);line-height:1}
+.greet{font-size:18px}
+.sub{color:var(--dim);max-width:520px;line-height:1.6}
+.log{font-family:var(--mono);font-size:12px;color:var(--dim);min-height:18px}
+.log b{color:var(--accent2);font-weight:400}
+
+/* tasks */
+.addrow{display:flex;gap:6px;margin-bottom:10px}
+.addrow button{flex:none}
+ul.tasks{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:4px}
+ul.tasks li{display:flex;align-items:center;gap:8px;padding:6px 8px;border-radius:8px;background:var(--panel2)}
+ul.tasks li.done span{text-decoration:line-through;color:var(--dim)}
+ul.tasks li span{flex:1;word-break:break-word}
+ul.tasks input[type=checkbox]{width:auto;accent-color:var(--accent)}
+ul.tasks .del{border:0;background:none;color:var(--dim);padding:0 4px}
+
+/* focus */
+.timer{font-family:var(--mono);font-size:40px;text-align:center;color:var(--accent);margin:4px 0 10px}
+.timer.brk{color:var(--ok)}
+.trow{display:flex;gap:6px;justify-content:center;flex-wrap:wrap}
+.count{text-align:center;color:var(--dim);font-size:12px;margin-top:8px}
+textarea.notes{min-height:120px;resize:vertical;font-family:var(--mono);font-size:12px;line-height:1.5}
+
+/* modal */
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.6);display:none;place-items:center;z-index:20;padding:16px}
+.modal.show{display:grid}
+.card{background:var(--panel);border:1px solid var(--accent);border-radius:14px;padding:18px;width:min(420px,100%);display:flex;flex-direction:column;gap:10px}
+.card h3{margin:0;font-family:var(--mono);letter-spacing:.1em;font-size:14px;color:var(--accent)}
+.card label{font-size:12px;color:var(--dim)}
+.card .row{display:flex;gap:8px;justify-content:flex-end}
+
+/* boot */
+.boot{position:fixed;inset:0;z-index:30;background:var(--bg);display:grid;place-items:center;text-align:center;transition:opacity .5s}
+.boot.gone{opacity:0;pointer-events:none}
+.boot .ring{width:150px;height:150px;border-radius:50%;border:3px solid var(--accent);display:grid;place-items:center;margin:0 auto 22px;box-shadow:0 0 40px rgba(70,217,255,.4),inset 0 0 30px rgba(70,217,255,.25);animation:pulse 2s infinite;cursor:pointer}
+.boot .ring span{font-family:var(--mono);letter-spacing:.3em;color:var(--accent)}
+.boot p{color:var(--dim);font-family:var(--mono);font-size:12px;letter-spacing:.15em}
+
+@media (max-width:1000px){
+  main{grid-template-columns:1fr;overflow:auto}
+  .center{min-height:420px}
+  .app{height:auto;min-height:100vh}
+}
+</style>
+</head>
+<body>
+<div class="boot" id="boot">
+  <div>
+    <div class="ring" id="engage"><span>ENGAGE</span></div>
+    <p>NOMAD INDUSTRIES · WORKSTATION</p>
+    <p style="opacity:.6">click or press Enter</p>
+  </div>
+</div>
+
+<div class="app">
+  <header>
+    <div class="brand"><div class="core" id="core"></div>NOMAD <small>WORKSTATION</small></div>
+    <div class="spacer"></div>
+    <div class="persona" title="Voice persona">
+      <button id="pNate">Nate</button><button id="pNat">Nat</button>
+    </div>
+    <button id="micBtn" title="Listen for 'Nate' or 'Nat'">🎙 Listen</button>
+    <button id="menuBtn" title="Backup &amp; settings">⚙</button>
+    <div style="text-align:right">
+      <div class="clock" id="clock">--:--</div>
+      <div class="date" id="date"></div>
+    </div>
+  </header>
+
+  <main>
+    <!-- apps -->
+    <section class="panel">
+      <div class="ph">Apps <button id="addApp" style="padding:2px 8px">+ Add</button></div>
+      <div class="pb">
+        <div class="apps" id="apps"></div>
+        <p class="hint" style="margin-top:12px">Click an app to open it here. ↗ opens it in its own tab. Hover a tile to edit or remove.</p>
+      </div>
+    </section>
+
+    <!-- center -->
+    <section class="panel center">
+      <div class="viewbar" id="viewbar">
+        <span class="t" id="viewTitle"></span>
+        <button id="popOut">↗ New tab</button>
+        <button id="homeBtn">⌂ Home</button>
+      </div>
+      <iframe id="frame" title="App view" allow="microphone; camera; clipboard-read; clipboard-write"></iframe>
+      <div class="home" id="home">
+        <div class="big" id="bigClock">--:--</div>
+        <div class="greet" id="greet">Good day, sir.</div>
+        <div class="sub" id="brief"></div>
+        <div class="log" id="log"></div>
+      </div>
+    </section>
+
+    <!-- right -->
+    <div class="side">
+      <section class="panel">
+        <div class="ph">Today <span id="taskCount"></span></div>
+        <div class="pb">
+          <div class="addrow"><input id="taskIn" placeholder="Add a task, press Enter"><button id="taskAdd">+</button></div>
+          <ul class="tasks" id="tasks"></ul>
+        </div>
+      </section>
+      <section class="panel">
+        <div class="ph">Focus <span id="mode">Work</span></div>
+        <div class="pb">
+          <div class="timer" id="timer">25:00</div>
+          <div class="trow">
+            <button id="tStart">Start</button>
+            <button id="tReset">Reset</button>
+            <button id="t25" class="on">25/5</button>
+            <button id="t50">50/10</button>
+          </div>
+          <div class="count" id="sessions"></div>
+        </div>
+      </section>
+      <section class="panel" style="flex:1">
+        <div class="ph">Scratchpad</div>
+        <div class="pb" style="display:flex;flex:1"><textarea class="notes" id="notes" placeholder="Quick notes — saved automatically." style="flex:1"></textarea></div>
+      </section>
+    </div>
+  </main>
+</div>
+
+<!-- add/edit app -->
+<div class="modal" id="appModal">
+  <div class="card">
+    <h3 id="appModalTitle">ADD APP</h3>
+    <label>Name</label><input id="aName" placeholder="e.g. Budget">
+    <label>Web address</label><input id="aUrl" placeholder="https://yourname.github.io/budget/">
+    <label>Icon (1–2 characters or an emoji)</label><input id="aIcon" placeholder="B" maxlength="3">
+    <div class="row"><button id="aCancel">Cancel</button><button id="aSave" class="on">Save</button></div>
+  </div>
+</div>
+
+<!-- settings -->
+<div class="modal" id="menuModal">
+  <div class="card">
+    <h3>SETTINGS</h3>
+    <label>Your name (used in greetings)</label><input id="sName" placeholder="sir">
+    <label>Backup — everything lives in this browser, so export now and then.</label>
+    <div class="row" style="justify-content:flex-start">
+      <button id="exportBtn">Export backup</button>
+      <button id="importBtn">Import backup</button>
+      <input type="file" id="importFile" accept="application/json" style="display:none">
+    </div>
+    <label>Voice commands (say "Nate" or "Nat" first)</label>
+    <div class="hint">“Nate, open Odonta” · “Nat, add task call the landlord” · “Nate, start focus” · “Nat, stop” · “Nate, what time is it” · “Nat, brief me” · “Nate, go home”</div>
+    <div class="row"><button id="mClose" class="on">Done</button></div>
+  </div>
+</div>
+
+<script>
+(() => {
+  const $ = id => document.getElementById(id);
+  const KEY = 'nomad.workstation.v1';
+
+  // ---------- state ----------
+  const defaults = {
+    name: 'sir',
+    persona: 'nate',
+    apps: [
+      { id: 'odonta', name: 'Odonta', url: '', icon: 'O' },
+      { id: 'iron',   name: 'Nomad Iron', url: '', icon: 'NI' },
+      { id: 'fuel',   name: 'Nomad Fuel', url: '', icon: 'NF' },
+      { id: 'posture',name: 'Posture Lab', url: '', icon: 'PL' }
+    ],
+    tasks: [],
+    notes: '',
+    focusLen: [25, 5],
+    sessions: { day: '', n: 0 }
+  };
+  let S;
+  function load() {
+    try { S = Object.assign({}, defaults, JSON.parse(localStorage.getItem(KEY) || '{}')); }
+    catch (e) { S = JSON.parse(JSON.stringify(defaults)); }
+  }
+  function save() { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} }
+  load();
+
+  const today = () => new Date().toISOString().slice(0, 10);
+  if (S.sessions.day !== today()) S.sessions = { day: today(), n: 0 };
+
+  // ---------- voice ----------
+  const synth = window.speechSynthesis;
+  const VOICES = {
+    nate: ['Daniel', 'Arthur', 'Oliver', 'Alex', 'Aaron', 'Fred', 'Rishi', 'Google UK English Male', 'Microsoft Ryan', 'Microsoft Guy'],
+    nat:  ['Serena', 'Kate', 'Samantha', 'Karen', 'Moira', 'Tessa', 'Victoria', 'Google UK English Female', 'Microsoft Sonia', 'Microsoft Jenny']
+  };
+  function pickVoice(p) {
+    if (!synth) return null;
+    const vs = synth.getVoices().filter(v => /^en/i.test(v.lang));
+    for (const n of VOICES[p]) { const v = vs.find(v => v.name.includes(n)); if (v) return v; }
+    return vs[0] || null;
+  }
+  function say(text, persona = S.persona) {
+    log(text, persona);
+    if (!synth) return;
+    try {
+      synth.cancel();
+      const u = new SpeechSynthesisUtterance(text);
+      const v = pickVoice(persona); if (v) u.voice = v;
+      u.rate = 1.02; u.pitch = persona === 'nat' ? 1.05 : 0.95;
+      const core = $('core'); core.classList.add('live');
+      u.onend = () => core.classList.remove('live');
+      synth.speak(u);
+    } catch (e) {}
+  }
+  if (synth) synth.onvoiceschanged = () => {};
+  function log(text, persona) {
+    $('log').innerHTML = `<b>${persona === 'nat' ? 'NAT' : 'NATE'} ›</b> ${escapeHtml(text)}`;
+  }
+  function setPersona(p) {
+    S.persona = p; save();
+    $('pNate').classList.toggle('on', p === 'nate');
+    $('pNat').classList.toggle('on', p === 'nat');
+  }
+  $('pNate').onclick = () => { setPersona('nate'); say(`Nate here, ${S.name}.`); };
+  $('pNat').onclick  = () => { setPersona('nat');  say(`Nat here, ${S.name}.`); };
+  setPersona(S.persona);
+
+  // ---------- listening ("Nate" / "Nat") ----------
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  let rec = null, listening = false;
+  $('micBtn').onclick = () => {
+    if (!SR) { say(`This browser can't listen, ${S.name}. Chrome or Safari will.`); return; }
+    listening ? stopListening() : startListening();
+  };
+  function startListening() {
+    rec = new SR(); rec.lang = 'en-ZA'; rec.continuous = true; rec.interimResults = false;
+    rec.onresult = e => {
+      const t = e.results[e.results.length - 1][0].transcript.trim().toLowerCase();
+      const m = t.match(/\b(nate|nat|natasha|nathan)\b[\s,]*(.*)$/);
+      if (!m) return;
+      const persona = (m[1] === 'nate' || m[1] === 'nathan') ? 'nate' : 'nat';
+      setPersona(persona);
+      command(m[2] || '', persona);
+    };
+    rec.onerror = e => { if (e.error === 'not-allowed') { stopListening(); say(`Microphone access was declined, ${S.name}.`); } };
+    rec.onend = () => { if (listening) try { rec.start(); } catch (e) {} };
+    try { rec.start(); listening = true; $('micBtn').classList.add('on'); $('micBtn').textContent = '🎙 Listening'; log('Listening for Nate or Nat.', S.persona); } catch (e) {}
+  }
+  function stopListening() {
+    listening = false; try { rec && rec.stop(); } catch (e) {}
+    $('micBtn').classList.remove('on'); $('micBtn').textContent = '🎙 Listen';
+  }
+
+  function command(c, p) {
+    c = c.replace(/^(please|can you|could you)\s+/, '').trim();
+    if (!c) return say(`Yes, ${S.name}?`, p);
+    let m;
+    if ((m = c.match(/^(open|launch|show|start)\s+(.+)$/)) && !/focus|timer/.test(m[2])) {
+      const q = m[2].replace(/\bapp\b/, '').trim();
+      const a = S.apps.find(a => a.name.toLowerCase().includes(q) || q.includes(a.name.toLowerCase()));
+      if (a) { openApp(a); return say(`Opening ${a.name}.`, p); }
+      return say(`I have no app called ${q}, ${S.name}.`, p);
+    }
+    if ((m = c.match(/^(add (a )?task|remind me to|add)\s+(.+)$/))) { addTask(m[3]); return say(`Added: ${m[3]}.`, p); }
+    if (/focus|timer|pomodoro/.test(c) && !/stop|pause/.test(c)) { if (!running) toggleTimer(); return say(`Focus engaged. ${S.focusLen[0]} minutes.`, p); }
+    if (/^(stop|pause)/.test(c)) { if (running) toggleTimer(); return say('Paused.', p); }
+    if (/time/.test(c)) return say(`It's ${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}, ${S.name}.`, p);
+    if (/brief|status|today/.test(c)) return say(briefText(), p);
+    if (/home|close/.test(c)) { goHome(); return say('Home.', p); }
+    if (/thank/.test(c)) return say(`Always, ${S.name}.`, p);
+    say(`I didn't catch a command there, ${S.name}.`, p);
+  }
+
+  // ---------- clock / greeting ----------
+  function tick() {
+    const d = new Date();
+    const hm = d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    $('clock').textContent = hm; $('bigClock').textContent = hm;
+    $('date').textContent = d.toLocaleDateString([], { weekday: 'long', day: 'numeric', month: 'long' });
+  }
+  function partOfDay() { const h = new Date().getHours(); return h < 12 ? 'Good morning' : h < 18 ? 'Good afternoon' : 'Good evening'; }
+  function briefText() {
+    const open = S.tasks.filter(t => !t.done).length;
+    const tasks = open === 0 ? 'Your list is clear' : `${open} task${open > 1 ? 's' : ''} outstanding`;
+    return `${tasks}, and ${S.sessions.n} focus session${S.sessions.n === 1 ? '' : 's'} logged today.`;
+  }
+  function renderHome() {
+    $('greet').textContent = `${partOfDay()}, ${S.name}.`;
+    $('brief').textContent = briefText();
+  }
+  tick(); setInterval(tick, 1000 * 5);
+
+  // ---------- apps ----------
+  let current = null;
+  function renderApps() {
+    const wrap = $('apps'); wrap.innerHTML = '';
+    S.apps.forEach(a => {
+      const el = document.createElement('div');
+      el.className = 'tile' + (current && current.id === a.id ? ' active' : '');
+      el.innerHTML = `<div class="ic">${escapeHtml(a.icon || a.name[0])}</div>
+        <div class="nm">${escapeHtml(a.name)}<small>${a.url ? escapeHtml(a.url.replace(/^https?:\/\//, '')) : 'tap to set address'}</small></div>
+        <button class="x" data-act="ext" title="Open in new tab">↗</button>
+        <button class="x" data-act="edit" title="Edit">✎</button>
+        <button class="x" data-act="del" title="Remove">✕</button>`;
+      el.onclick = e => {
+        const act = e.target.dataset.act;
+        if (act === 'del') { if (confirm(`Remove ${a.name}?`)) { S.apps = S.apps.filter(x => x.id !== a.id); save(); if (current && current.id === a.id) goHome(); renderApps(); } return; }
+        if (act === 'edit') return editApp(a);
+        if (act === 'ext') { if (a.url) window.open(a.url, '_blank'); else editApp(a); return; }
+        openApp(a);
+      };
+      wrap.appendChild(el);
+    });
+  }
+  function openApp(a) {
+    if (!a.url) return editApp(a);
+    current = a;
+    $('frame').src = a.url; $('frame').classList.add('show');
+    $('home').classList.add('hide'); $('viewbar').classList.add('show');
+    $('viewTitle').textContent = a.name.toUpperCase();
+    renderApps();
+  }
+  function goHome() {
+    current = null; $('frame').src = 'about:blank'; $('frame').classList.remove('show');
+    $('home').classList.remove('hide'); $('viewbar').classList.remove('show');
+    renderHome(); renderApps();
+  }
+  $('homeBtn').onclick = goHome;
+  $('popOut').onclick = () => current && window.open(current.url, '_blank');
+
+  let editing = null;
+  function editApp(a) {
+    editing = a || null;
+    $('appModalTitle').textContent = a ? 'EDIT APP' : 'ADD APP';
+    $('aName').value = a ? a.name : ''; $('aUrl').value = a ? a.url : ''; $('aIcon').value = a ? a.icon : '';
+    $('appModal').classList.add('show'); setTimeout(() => (a ? $('aUrl') : $('aName')).focus(), 50);
+  }
+  $('addApp').onclick = () => editApp(null);
+  $('aCancel').onclick = () => $('appModal').classList.remove('show');
+  $('aSave').onclick = () => {
+    const name = $('aName').value.trim(); let url = $('aUrl').value.trim();
+    if (!name) return $('aName').focus();
+    if (url && !/^[a-z]+:\/\//i.test(url)) url = 'https://' + url;
+    const icon = $('aIcon').value.trim() || name.slice(0, 2);
+    if (editing) Object.assign(editing, { name, url, icon });
+    else S.apps.push({ id: 'a' + Date.now(), name, url, icon });
+    save(); renderApps(); $('appModal').classList.remove('show');
+  };
+  [$('aName'), $('aUrl'), $('aIcon')].forEach(i => i.addEventListener('keydown', e => { if (e.key === 'Enter') $('aSave').click(); }));
+
+  // ---------- tasks ----------
+  function addTask(text) { S.tasks.push({ id: Date.now() + Math.random(), text, done: false }); save(); renderTasks(); }
+  function renderTasks() {
+    const ul = $('tasks'); ul.innerHTML = '';
+    S.tasks.forEach(t => {
+      const li = document.createElement('li'); if (t.done) li.className = 'done';
+      li.innerHTML = `<input type="checkbox" ${t.done ? 'checked' : ''}><span>${escapeHtml(t.text)}</span><button class="del" title="Delete">✕</button>`;
+      li.querySelector('input').onchange = e => { t.done = e.target.checked; save(); renderTasks(); };
+      li.querySelector('.del').onclick = () => { S.tasks = S.tasks.filter(x => x !== t); save(); renderTasks(); };
+      ul.appendChild(li);
+    });
+    const open = S.tasks.filter(t => !t.done).length;
+    $('taskCount').textContent = S.tasks.length ? `${open} open` : '';
+    renderHome();
+  }
+  $('taskAdd').onclick = () => { const v = $('taskIn').value.trim(); if (v) { addTask(v); $('taskIn').value = ''; } };
+  $('taskIn').addEventListener('keydown', e => { if (e.key === 'Enter') $('taskAdd').click(); });
+
+  // ---------- focus timer ----------
+  let running = false, onBreak = false, remaining = S.focusLen[0] * 60, timerId = null, endAt = 0;
+  function fmt(s) { return String(Math.floor(s / 60)).padStart(2, '0') + ':' + String(s % 60).padStart(2, '0'); }
+  function renderTimer() {
+    $('timer').textContent = fmt(remaining); $('timer').classList.toggle('brk', onBreak);
+    $('mode').textContent = onBreak ? 'Break' : 'Work';
+    $('tStart').textContent = running ? 'Pause' : 'Start';
+    $('sessions').textContent = `${S.sessions.n} session${S.sessions.n === 1 ? '' : 's'} today`;
+    document.title = running ? `${fmt(remaining)} · Nomad` : 'Nomad Workstation';
+  }
+  function toggleTimer() {
+    running = !running;
+    if (running) {
+      endAt = Date.now() + remaining * 1000;
+      timerId = setInterval(() => {
+        remaining = Math.max(0, Math.round((endAt - Date.now()) / 1000));
+        if (remaining === 0) {
+          if (!onBreak) { S.sessions.n++; save(); say(`Session complete, ${S.name}. Take ${S.focusLen[1]}.`); }
+          else say('Break over. Back to it.');
+          onBreak = !onBreak; remaining = S.focusLen[onBreak ? 1 : 0] * 60; endAt = Date.now() + remaining * 1000;
+          renderHome();
+        }
+        renderTimer();
+      }, 500);
+    } else clearInterval(timerId);
+    renderTimer();
+  }
+  function setLen(a, b, btn) {
+    S.focusLen = [a, b]; save();
+    $('t25').classList.toggle('on', a === 25); $('t50').classList.toggle('on', a === 50);
+    if (!running) { onBreak = false; remaining = a * 60; renderTimer(); }
+  }
+  $('tStart').onclick = toggleTimer;
+  $('tReset').onclick = () => { if (running) toggleTimer(); onBreak = false; remaining = S.focusLen[0] * 60; renderTimer(); };
+  $('t25').onclick = () => setLen(25, 5);
+  $('t50').onclick = () => setLen(50, 10);
+  setLen(S.focusLen[0], S.focusLen[1]);
+
+  // ---------- notes ----------
+  $('notes').value = S.notes;
+  let nt; $('notes').addEventListener('input', () => { clearTimeout(nt); nt = setTimeout(() => { S.notes = $('notes').value; save(); }, 400); });
+
+  // ---------- settings / backup ----------
+  $('menuBtn').onclick = () => { $('sName').value = S.name; $('menuModal').classList.add('show'); };
+  $('mClose').onclick = () => { S.name = $('sName').value.trim() || 'sir'; save(); renderHome(); $('menuModal').classList.remove('show'); };
+  $('exportBtn').onclick = () => {
+    const blob = new Blob([JSON.stringify(S, null, 2)], { type: 'application/json' });
+    const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+    a.download = `nomad-backup-${today()}.json`; a.click(); URL.revokeObjectURL(a.href);
+  };
+  $('importBtn').onclick = () => $('importFile').click();
+  $('importFile').onchange = e => {
+    const f = e.target.files[0]; if (!f) return;
+    f.text().then(t => { try { S = Object.assign({}, defaults, JSON.parse(t)); save(); boot(true); say('Backup restored.'); } catch (err) { alert('That file is not a Nomad backup.'); } });
+  };
+  document.querySelectorAll('.modal').forEach(m => m.addEventListener('click', e => { if (e.target === m) m.classList.remove('show'); }));
+
+  // ---------- boot ----------
+  function boot(silent) {
+    renderApps(); renderTasks(); renderTimer(); renderHome();
+    if (!silent) say(`${partOfDay()}, ${S.name}. Nomad is online. ${briefText()}`);
+  }
+  function engage() { $('boot').classList.add('gone'); boot(false); document.removeEventListener('keydown', onKey); }
+  function onKey(e) { if (e.key === 'Enter' || e.key === ' ') engage(); }
+  $('engage').onclick = engage; document.addEventListener('keydown', onKey);
+  renderApps(); renderTasks(); renderTimer(); renderHome();
+
+  function escapeHtml(s) { return String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
+})();
+</script>
+</body>
+</html>
