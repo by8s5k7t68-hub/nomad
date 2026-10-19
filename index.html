@@ -14,7 +14,7 @@
   --bg:#06101c; --panel:rgba(8,18,32,.9); --panel2:#0f1d31; --line:#1d3554;
   --ink:#d8e6f5; --dim:#7f93ad; --accent:#46d9ff; --accent2:#ffb547; --ok:#5be39b; --bad:#ff6b6b;
   --mono:'JetBrains Mono',ui-monospace,Menlo,monospace; --sans:'Inter',-apple-system,system-ui,sans-serif;
-  --pw:400px;
+  --pw:410px;
 }
 *{box-sizing:border-box}
 html,body{margin:0;height:100%;overflow:hidden;background:var(--bg);color:var(--ink);font:14px/1.45 var(--sans)}
@@ -22,26 +22,26 @@ button,input,textarea,select{font:inherit;color:inherit}
 button{cursor:pointer;background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:6px 10px;transition:.15s}
 button:hover{border-color:var(--accent);color:var(--accent)}
 button.on{background:rgba(70,217,255,.12);border-color:var(--accent);color:var(--accent)}
+button.danger:hover{border-color:var(--bad);color:var(--bad)}
 input,textarea,select{background:#050d18;border:1px solid var(--line);border-radius:8px;padding:7px 9px;width:100%}
 input:focus,textarea:focus,select:focus{outline:none;border-color:var(--accent)}
+input[type=range]{padding:0;border:0;background:transparent;accent-color:var(--accent);height:22px}
 code{font-family:var(--mono);font-size:12px;color:var(--accent2)}
 
 #scene{position:fixed;inset:0;width:100%;height:100%;display:block;touch-action:none;cursor:grab}
 #scene.pointer{cursor:pointer}
+#scene.move{cursor:move}
 body.lite #scene{display:none}
 
-/* lite grid */
-.lite-grid{display:none;position:fixed;inset:0;padding:90px 20px 110px;overflow:auto;
-  background-color:var(--bg);
+.lite-grid{display:none;position:fixed;inset:0;padding:90px 20px 110px;overflow:auto;background-color:var(--bg);
   background-image:linear-gradient(var(--line) 1px,transparent 1px),linear-gradient(90deg,var(--line) 1px,transparent 1px);background-size:40px 40px;
-  grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:14px;align-content:center;max-width:900px;margin:0 auto}
+  grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:14px;align-content:center}
 body.lite .lite-grid{display:grid}
 .station{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px;text-align:left;display:flex;flex-direction:column;gap:6px}
 .station b{font-family:var(--mono);letter-spacing:.12em;color:var(--accent);font-weight:600}
 .station span{color:var(--dim);font-size:12px}
 
-/* header */
-header{position:fixed;top:0;left:0;right:0;display:flex;align-items:center;gap:10px;padding:12px 16px;z-index:5;flex-wrap:wrap;
+header{position:fixed;top:0;left:0;right:0;display:flex;align-items:center;gap:8px;padding:12px 16px;z-index:5;flex-wrap:wrap;
   background:linear-gradient(rgba(6,16,28,.95),rgba(6,16,28,0));pointer-events:none}
 header>*{pointer-events:auto}
 .brand{display:flex;align-items:center;gap:10px;font-family:var(--mono);letter-spacing:.2em;font-weight:600}
@@ -58,15 +58,17 @@ header>*{pointer-events:auto}
 .persona{display:flex;border:1px solid var(--line);border-radius:8px;overflow:hidden;background:rgba(8,18,32,.75)}
 .persona button{border:0;border-radius:0;background:transparent}
 .persona button.on{background:rgba(70,217,255,.14)}
+.hbtn{background:rgba(8,18,32,.75)}
+#buildBtn.on{background:rgba(255,181,71,.15);border-color:var(--accent2);color:var(--accent2)}
 .clock{font-family:var(--mono);font-size:18px;color:var(--accent);text-align:right}
 .date{font-size:11px;color:var(--dim);text-align:right}
 .hint-top{position:fixed;top:62px;left:16px;z-index:4;font:10px var(--mono);letter-spacing:.14em;color:var(--dim);pointer-events:none}
+body.building .hint-top{color:var(--accent2)}
 
-/* tooltip */
-.tip{position:fixed;z-index:8;pointer-events:none;font:11px var(--mono);letter-spacing:.12em;color:var(--accent2);background:var(--panel);border:1px solid var(--accent2);border-radius:6px;padding:4px 8px;display:none}
+.tip{position:fixed;z-index:8;pointer-events:none;font:11px var(--mono);letter-spacing:.12em;color:var(--accent2);background:var(--panel);border:1px solid var(--accent2);border-radius:6px;padding:4px 8px;display:none;white-space:nowrap}
 .tip.show{display:block}
+.tip.bad{color:var(--bad);border-color:var(--bad)}
 
-/* command bar + subtitle */
 .cmdbar{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);width:min(720px,calc(100% - 24px));display:flex;gap:8px;padding:8px;
   background:var(--panel);border:1px solid var(--line);border-radius:14px;z-index:7;backdrop-filter:blur(8px)}
 .cmdbar input{border:0;background:transparent;font-family:var(--mono);font-size:13px}
@@ -79,29 +81,28 @@ header>*{pointer-events:auto}
 .subtitle b{color:var(--accent2);font-weight:400}
 @media (min-width:901px){ body.panel-open .subtitle{left:calc((100% - var(--pw) - 24px)/2)} }
 
-/* side panel */
 .panel{position:fixed;top:64px;right:12px;bottom:84px;width:var(--pw);z-index:6;display:flex;flex-direction:column;
   background:var(--panel);border:1px solid var(--accent);border-radius:14px;backdrop-filter:blur(10px);
   transform:translateX(calc(100% + 30px));transition:transform .35s ease;box-shadow:0 0 40px rgba(70,217,255,.12)}
 .panel.show{transform:none}
-.ph{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;border-bottom:1px solid var(--line);font:12px var(--mono);letter-spacing:.18em;color:var(--accent);text-transform:uppercase}
-.ph button{padding:2px 8px}
+.ph{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:12px 14px;border-bottom:1px solid var(--line);font:12px var(--mono);letter-spacing:.18em;color:var(--accent);text-transform:uppercase}
+.ph span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ph button{padding:2px 8px;flex:none}
 .pb{padding:14px;overflow:auto;flex:1;min-height:0;display:flex;flex-direction:column;gap:10px}
 .hint{color:var(--dim);font-size:12px;line-height:1.5;margin:0}
-.row{display:flex;gap:8px;align-items:center}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.row>button{flex:1}
 .wide{width:100%}
 
-/* apps */
 .apps{display:flex;flex-direction:column;gap:6px}
 .tile{display:flex;align-items:center;gap:10px;padding:8px;border:1px solid var(--line);border-radius:10px;background:var(--panel2);cursor:pointer}
 .tile:hover{border-color:var(--accent)}
 .tile .ic{width:32px;height:32px;border-radius:8px;display:grid;place-items:center;font-family:var(--mono);font-weight:600;background:rgba(70,217,255,.12);color:var(--accent);flex:none}
 .tile .nm{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .tile .nm small{display:block;color:var(--dim);font-size:11px;overflow:hidden;text-overflow:ellipsis}
-.tile .x{border:0;background:none;padding:2px 5px;color:var(--dim)}
+.tile .x{border:0;background:none;padding:2px 5px;color:var(--dim);flex:none}
 .tile .x:hover{color:var(--accent)}
 
-/* tasks */
 .addrow{display:flex;gap:6px}
 .addrow button{flex:none}
 ul.tasks{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:4px}
@@ -111,14 +112,13 @@ ul.tasks li span{flex:1;word-break:break-word}
 ul.tasks input[type=checkbox]{width:auto;accent-color:var(--accent)}
 ul.tasks .del{border:0;background:none;color:var(--dim);padding:0 4px}
 
-/* focus */
 .timer{font:600 56px var(--mono);text-align:center;color:var(--accent);margin:10px 0 4px}
 .timer.brk{color:var(--ok)}
 .trow{display:flex;gap:6px;justify-content:center;flex-wrap:wrap}
 .count{text-align:center;color:var(--dim);font-size:12px}
 textarea.notes{flex:1;min-height:260px;resize:none;font-family:var(--mono);font-size:12.5px;line-height:1.6}
+textarea.small{min-height:70px;resize:vertical;font-size:13px}
 
-/* chat */
 .chatlog{display:flex;flex-direction:column;gap:8px}
 .msg{padding:8px 11px;border-radius:10px;line-height:1.5;white-space:pre-wrap;word-break:break-word}
 .msg.u{background:var(--panel2);margin-left:36px}
@@ -126,7 +126,6 @@ textarea.notes{flex:1;min-height:260px;resize:none;font-family:var(--mono);font-
 .msg .who{display:block;font:10px var(--mono);letter-spacing:.14em;color:var(--accent2);margin-bottom:2px}
 .notice{border:1px dashed var(--accent2);border-radius:10px;padding:10px;font-size:13px;display:flex;flex-direction:column;gap:8px}
 
-/* spine */
 .vinfo{border:1px solid var(--line);border-radius:12px;padding:12px;background:rgba(70,217,255,.04)}
 .vinfo h4{margin:0 0 2px;font:600 22px var(--mono);color:var(--accent2)}
 .vinfo .rg{font:10px var(--mono);letter-spacing:.18em;color:var(--dim);text-transform:uppercase}
@@ -134,32 +133,42 @@ textarea.notes{flex:1;min-height:260px;resize:none;font-family:var(--mono);font-
 .vinfo .nv{color:var(--accent);font-size:12.5px}
 .reg .rl{font:10px var(--mono);letter-spacing:.18em;color:var(--dim);text-transform:uppercase;margin:4px 0}
 .chips{display:flex;flex-wrap:wrap;gap:4px}
-.chips button{padding:3px 7px;font:11px var(--mono)}
+.chips button{padding:3px 8px;font:11px var(--mono)}
 
-/* settings */
 .sec{border-top:1px solid var(--line);padding-top:10px;display:flex;flex-direction:column;gap:6px}
 .sec:first-child{border-top:0;padding-top:0}
 .sl{font:10px var(--mono);letter-spacing:.18em;color:var(--accent);text-transform:uppercase}
-.sec label{font-size:12px;color:var(--dim)}
-.chk{display:flex;align-items:center;gap:8px;color:var(--ink)!important;font-size:13px!important}
+.sec label{font-size:12px;color:var(--dim);display:flex;justify-content:space-between}
+.sec label span{font-family:var(--mono);color:var(--accent2)}
+.chk{display:flex!important;justify-content:flex-start!important;align-items:center;gap:8px;color:var(--ink)!important;font-size:13px!important}
 .chk input{width:auto;accent-color:var(--accent)}
+.sld{display:flex;flex-direction:column;gap:0}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:4px 12px}
 
-/* app view */
+.cat{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.cat button{display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px 4px;font-size:11.5px;line-height:1.2}
+.cat button b{font-size:20px;font-weight:400}
+.list{display:flex;flex-direction:column;gap:4px}
+.li{display:flex;align-items:center;gap:8px;padding:6px 8px;border-radius:8px;background:var(--panel2);font-size:13px}
+.li .t{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.li .t small{color:var(--dim);font-size:11px;margin-left:6px}
+.li button{padding:2px 8px;font-size:12px;flex:none}
+.big-btn{padding:10px;font:600 12px var(--mono);letter-spacing:.14em}
+
 .appview{position:fixed;inset:12px;z-index:10;display:none;flex-direction:column;background:var(--panel);border:1px solid var(--accent);border-radius:14px;overflow:hidden}
 .appview.show{display:flex}
 .avbar{display:flex;align-items:center;gap:8px;padding:8px 12px;border-bottom:1px solid var(--line)}
 .avbar .t{flex:1;font:12px var(--mono);letter-spacing:.15em;color:var(--accent)}
 .appview iframe{flex:1;border:0;width:100%;background:#fff}
 
-/* modal */
 .modal{position:fixed;inset:0;background:rgba(0,0,0,.6);display:none;place-items:center;z-index:20;padding:16px}
 .modal.show{display:grid}
 .card{background:var(--panel);border:1px solid var(--accent);border-radius:14px;padding:18px;width:min(420px,100%);display:flex;flex-direction:column;gap:10px}
 .card h3{margin:0;font:600 14px var(--mono);letter-spacing:.1em;color:var(--accent)}
 .card label{font-size:12px;color:var(--dim)}
 .card .row{justify-content:flex-end}
+.card .row>button{flex:none}
 
-/* boot */
 .boot{position:fixed;inset:0;z-index:30;background:var(--bg);display:grid;place-items:center;text-align:center;transition:opacity .6s}
 .boot.gone{opacity:0;pointer-events:none}
 .boot .ring{width:150px;height:150px;border-radius:50%;border:3px solid var(--accent);display:grid;place-items:center;margin:0 auto 22px;
@@ -194,6 +203,9 @@ textarea.notes{flex:1;min-height:260px;resize:none;font-family:var(--mono);font-
   <button class="station" data-k="notes"><b>SCRATCHPAD</b><span>Quick notes</span></button>
   <button class="station" data-k="chat"><b>CONSOLE</b><span>Talk to Nate or Nat</span></button>
   <button class="station" data-k="spine"><b>SPINE</b><span>Vertebra reference</span></button>
+  <button class="station" data-k="holo"><b>HOLOGRAM</b><span>Ideas and designs</span></button>
+  <button class="station" data-k="workshop"><b>WORKSHOP</b><span>Furniture and layout</span></button>
+  <button class="station" data-k="bin"><b>BIN</b><span>Discarded things</span></button>
   <button class="station" data-k="status"><b>SYSTEMS</b><span>Voices, Ollama, backup</span></button>
 </div>
 
@@ -202,7 +214,9 @@ textarea.notes{flex:1;min-height:260px;resize:none;font-family:var(--mono);font-
   <div class="spacer"></div>
   <button class="chip-o" id="chip" title="Ollama status"><i></i><span id="chipTxt">OLLAMA</span></button>
   <div class="persona" title="Voice persona"><button id="pNate">Nate</button><button id="pNat">Nat</button></div>
-  <button id="sysBtn" title="Systems">⚙</button>
+  <button class="hbtn" id="buildBtn" title="Build mode (B)">🛠</button>
+  <button class="hbtn" id="shopBtn" title="Workshop">🧰</button>
+  <button class="hbtn" id="sysBtn" title="Systems">⚙</button>
   <div><div class="clock" id="clock">--:--</div><div class="date" id="date"></div></div>
 </header>
 <div class="hint-top" id="hint"></div>
@@ -240,9 +254,27 @@ textarea.notes{flex:1;min-height:260px;resize:none;font-family:var(--mono);font-
 (() => {
 'use strict';
 const $ = id => document.getElementById(id);
-const KEY = 'nomad.workstation.v1';           // same key as v1, so existing apps/tasks carry over
+const KEY = 'nomad.workstation.v1';           // same key as before, so existing apps/tasks carry over
 const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+const uid = p => p + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+const clone = o => JSON.parse(JSON.stringify(o));
+
+/* =================== ROOM LAYOUT DEFAULTS =================== */
+const HOLO = { x: -0.8, z: 0.55 };
+const BIN = { x: 1.6, z: -1.3 };
+const DEFAULT_PROPS = () => [
+  { id: 'p_shelf', type: 'shelf', x: -2.84, y: 0, z: -1.2, ry: 0, s: 1, label: 'Bookshelf' },
+  { id: 'p_plant', type: 'plant', x: -2.84, y: 1.265, z: -0.6, ry: 0, s: 0.7, label: 'Shelf plant' },
+  { id: 'p_sbox', type: 'crate', x: -2.84, y: 1.735, z: -0.62, ry: 0, s: 0.5, label: 'Storage box' },
+  { id: 'p_crate1', type: 'crate', x: 2.3, y: 0, z: -2.05, ry: 0, s: 1, label: 'Crate' },
+  { id: 'p_crate2', type: 'crate', x: 2.26, y: 0.4, z: -2.1, ry: 0.3, s: 0.75, label: 'Small crate' },
+  { id: 'p_chair', type: 'chair', x: 0.15, y: 0, z: -1.05, ry: 0.25, s: 1, label: 'Desk chair' },
+  { id: 'p_db', type: 'dumbbell', x: 1.05, y: 0, z: -0.6, ry: 0.6, s: 1, label: 'Dumbbell' },
+  { id: 'p_tower', type: 'tower', x: -0.95, y: 0, z: -2.08, ry: 0, s: 1, label: 'PC tower' },
+  { id: 'p_rack', type: 'rack', x: 2.62, y: 0, z: -0.9, ry: -Math.PI / 2, s: 1, label: 'Server rack' },
+  { id: 'p_guitar', type: 'guitar', x: -2.5, y: 0, z: 1.0, ry: 0.9, s: 1, label: 'Guitar' }
+];
 
 /* =================== STATE (saved in this browser) =================== */
 const defaults = {
@@ -254,35 +286,43 @@ const defaults = {
     { id: 'fuel', name: 'Nomad Fuel', url: '', icon: 'NF' },
     { id: 'posture', name: 'Posture Lab', url: '', icon: 'PL' }
   ],
-  tasks: [], notes: '', focusLen: [25, 5], sessions: { day: '', n: 0 }
+  tasks: [], notes: '', focusLen: [25, 5], sessions: { day: '', n: 0 },
+  props: null, ideas: [], bin: [], holoSel: ''
 };
 let S;
 function merge(saved) {
   saved = saved && typeof saved === 'object' ? saved : {};
-  const d = JSON.parse(JSON.stringify(defaults));
+  const d = clone(defaults);
   const out = Object.assign(d, saved);
   out.voices = Object.assign({}, defaults.voices, saved.voices || {});
   out.ollama = Object.assign({}, defaults.ollama, saved.ollama || {});
-  if (!Array.isArray(out.chat)) out.chat = [];
+  ['chat', 'tasks', 'ideas', 'bin'].forEach(k => { if (!Array.isArray(out[k])) out[k] = []; });
   if (!Array.isArray(out.apps)) out.apps = d.apps;
-  if (!Array.isArray(out.tasks)) out.tasks = [];
+  if (!Array.isArray(out.props)) out.props = DEFAULT_PROPS();
   if (!out.sessions || typeof out.sessions !== 'object') out.sessions = { day: '', n: 0 };
   if (out.persona !== 'nat') out.persona = 'nate';
   return out;
 }
 function load() { let saved = {}; try { saved = JSON.parse(localStorage.getItem(KEY) || '{}'); } catch (e) {} S = merge(saved); }
+let saveT = null;
 function save() { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} }
-load();
+function saveSoon() { clearTimeout(saveT); saveT = setTimeout(save, 300); }
+load(); save();
 const today = () => new Date().toLocaleDateString('en-CA');
 if (S.sessions.day !== today()) { S.sessions = { day: today(), n: 0 }; save(); }
 
 let mode = 'overview', models = [], ollamaMsg = 'Not tested yet.', chipState = 'off';
 let running = false, onBreak = false, remaining = S.focusLen[0] * 60, timerId = null, endAt = 0;
-let selVert = -1, hoverVert = -1, hoverKey = null, currentApp = null, T = null;
+let selVert = -1, hoverVert = -1, hoverKey = null, hoverProp = null, selProp = null, selPart = 0;
+let currentApp = null, T = null, buildMode = false;
 const screens = {};
 
 const pName = (p = S.persona) => p === 'nat' ? 'Nat' : 'Nate';
-const LABEL = k => ({ apps: 'Apps', tasks: 'Today', focus: 'Focus', notes: 'Scratchpad', spine: 'Spine model', status: 'Systems', chat: `${pName()} console` })[k] || k;
+const getProp = id => S.props.find(p => p.id === id);
+const curIdea = () => S.ideas.find(i => i.id === S.holoSel) || null;
+const LABEL = k => ({ apps: 'Apps', tasks: 'Today', focus: 'Focus', notes: 'Scratchpad', spine: 'Spine model', status: 'Systems',
+  chat: `${pName()} console`, holo: 'Hologram table', bin: 'Bin', workshop: 'Workshop',
+  item: (getProp(selProp) || {}).label || 'Item' })[k] || k;
 const hm = () => new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
 const partOfDay = () => { const h = new Date().getHours(); return h < 12 ? 'Good morning' : h < 18 ? 'Good afternoon' : 'Good evening'; };
 const openTasks = () => S.tasks.filter(t => !t.done);
@@ -299,7 +339,6 @@ const PREF = {
 };
 let voiceList = [];
 function refreshVoices() { if (synth) voiceList = synth.getVoices().filter(v => /^en/i.test(v.lang)); }
-// Voices load asynchronously; speaking before they arrive falls back to the system default (often a female voice).
 const voicesReady = new Promise(res => {
   if (!synth) return res();
   refreshVoices(); if (voiceList.length) return res();
@@ -308,7 +347,6 @@ const voicesReady = new Promise(res => {
   setTimeout(fin, 2500);
 });
 if (synth && synth.addEventListener) synth.addEventListener('voiceschanged', () => { refreshVoices(); if (mode === 'status') fillVoiceSelects(); });
-
 function pickVoice(p) {
   if (!voiceList.length) refreshVoices();
   const chosen = S.voices[p];
@@ -370,7 +408,7 @@ $('micBtn').onclick = () => {
 function startListening() {
   rec = new SR(); rec.lang = 'en-ZA'; rec.continuous = true; rec.interimResults = false;
   rec.onresult = e => {
-    if (speaking) return;                       // don't hear ourselves
+    if (speaking) return;
     const t = e.results[e.results.length - 1][0].transcript.trim();
     const m = t.match(/\b(nate|nathan|nat|natasha|natalie)\b[\s,.:]*(.*)$/i);
     if (!m) return;
@@ -383,11 +421,52 @@ function startListening() {
 }
 function stopListening() { listening = false; try { rec && rec.stop(); } catch (e) {} $('micBtn').classList.remove('on'); }
 
+/* =================== FURNITURE CATALOGUE =================== */
+const CATALOG = [
+  { type: 'chair', name: 'Office chair', icon: '🪑', re: /chair/ },
+  { type: 'crate', name: 'Crate', icon: '📦', re: /crate|box/ },
+  { type: 'shelf', name: 'Wall shelf', icon: '📚', re: /shel|book/ },
+  { type: 'plant', name: 'Plant', icon: '🪴', re: /plant/ },
+  { type: 'lamp', name: 'Floor lamp', icon: '💡', re: /lamp|light/ },
+  { type: 'tower', name: 'PC tower', icon: '🖥', re: /tower|pc|computer/ },
+  { type: 'rack', name: 'Server rack', icon: '🗄', re: /rack|server/ },
+  { type: 'cabinet', name: 'Filing cabinet', icon: '🗃', re: /cabinet|filing/ },
+  { type: 'whiteboard', name: 'Whiteboard', icon: '📋', re: /white ?board|board/ },
+  { type: 'drop', name: 'Drop table', icon: '🛏', re: /drop|table|thompson|bench/ },
+  { type: 'printer', name: '3D printer', icon: '🖨', re: /printer/ },
+  { type: 'drone', name: 'Drone', icon: '🛸', re: /drone/ },
+  { type: 'reactor', name: 'Reactor core', icon: '🔆', re: /reactor|core/ },
+  { type: 'guitar', name: 'Guitar', icon: '🎸', re: /guitar/ },
+  { type: 'dumbbell', name: 'Dumbbell', icon: '🏋', re: /dumb ?bell|weight/ },
+  { type: 'beanbag', name: 'Beanbag', icon: '🫘', re: /bean ?bag/ }
+];
+const catName = t => (CATALOG.find(c => c.type === t) || {}).name || (t === 'custom' ? 'Custom design' : t);
+const PART_NAMES = { box: 'Box', sphere: 'Sphere', cyl: 'Cylinder', cone: 'Cone', torus: 'Ring', prism: 'Prism' };
+const TEMPLATES = {
+  blank: { name: 'New idea', parts: [{ t: 'box', x: 0, y: 0.2, z: 0, w: 0.4, h: 0.4, d: 0.4, r: 0 }] },
+  sidetable: { name: 'Side table', parts: [
+    { t: 'box', x: 0, y: 0.55, z: 0, w: 0.6, h: 0.04, d: 0.6, r: 0 },
+    { t: 'box', x: -0.26, y: 0.265, z: -0.26, w: 0.04, h: 0.53, d: 0.04, r: 0 }, { t: 'box', x: 0.26, y: 0.265, z: -0.26, w: 0.04, h: 0.53, d: 0.04, r: 0 },
+    { t: 'box', x: -0.26, y: 0.265, z: 0.26, w: 0.04, h: 0.53, d: 0.04, r: 0 }, { t: 'box', x: 0.26, y: 0.265, z: 0.26, w: 0.04, h: 0.53, d: 0.04, r: 0 } ] },
+  shelfunit: { name: 'Shelf unit', parts: [
+    { t: 'box', x: -0.4, y: 0.6, z: 0, w: 0.03, h: 1.2, d: 0.3, r: 0 }, { t: 'box', x: 0.4, y: 0.6, z: 0, w: 0.03, h: 1.2, d: 0.3, r: 0 },
+    { t: 'box', x: 0, y: 0.02, z: 0, w: 0.8, h: 0.03, d: 0.3, r: 0 }, { t: 'box', x: 0, y: 0.4, z: 0, w: 0.8, h: 0.03, d: 0.3, r: 0 },
+    { t: 'box', x: 0, y: 0.8, z: 0, w: 0.8, h: 0.03, d: 0.3, r: 0 }, { t: 'box', x: 0, y: 1.18, z: 0, w: 0.8, h: 0.03, d: 0.3, r: 0 } ] },
+  stool: { name: 'Stool', parts: [
+    { t: 'cyl', x: 0, y: 0.62, z: 0, w: 0.36, h: 0.05, d: 0.36, r: 0 }, { t: 'cyl', x: 0, y: 0.31, z: 0, w: 0.05, h: 0.6, d: 0.05, r: 0 },
+    { t: 'cyl', x: 0, y: 0.015, z: 0, w: 0.36, h: 0.03, d: 0.36, r: 0 } ] },
+  riser: { name: 'Monitor riser', parts: [
+    { t: 'box', x: 0, y: 0.12, z: 0, w: 0.6, h: 0.03, d: 0.25, r: 0 },
+    { t: 'box', x: -0.28, y: 0.055, z: 0, w: 0.03, h: 0.11, d: 0.25, r: 0 }, { t: 'box', x: 0.28, y: 0.055, z: 0, w: 0.03, h: 0.11, d: 0.25, r: 0 } ] }
+};
+
 /* =================== COMMANDS =================== */
 const STATIONS = [
   [/^(tasks?|today|to-?do( list)?|list)$/, 'tasks'], [/^(focus|timer|pomodoro)$/, 'focus'],
   [/^(notes?|scratch ?pad|pin ?board)$/, 'notes'], [/^(spine|spine model|skeleton)$/, 'spine'],
-  [/^(systems?|settings)$/, 'status'], [/^(console|chat)$/, 'chat'], [/^apps?$/, 'apps']
+  [/^(systems?|settings)$/, 'status'], [/^(console|chat)$/, 'chat'], [/^apps?$/, 'apps'],
+  [/^(holo(gram)?( table)?)$/, 'holo'], [/^(bin|trash|rubbish|recycle bin)$/, 'bin'],
+  [/^(workshop|inventory|catalogue|catalog|customi[sz]e)$/, 'workshop']
 ];
 function command(raw, p = S.persona, typed = false) {
   const c = String(raw).toLowerCase().replace(/[?.!,]+$/, '').replace(/^(please|can you|could you|would you)\s+/, '').trim();
@@ -402,6 +481,14 @@ function command(raw, p = S.persona, typed = false) {
     if (/^(open|launch)$/.test(m[1])) return say(`I have no app called ${q}, ${S.name}.`, p);
   }
   if ((m = c.match(/^(?:add (?:a )?task|new task|remind me to)\s+(.+)$/))) { addTask(m[1]); return say(`Added: ${m[1]}.`, p); }
+  if ((m = c.match(/^new idea(?:\s+(?:called|named))?\s*(.*)$/))) { newIdea('blank', m[1] ? m[1].replace(/^\w/, x => x.toUpperCase()) : ''); focus('holo'); return say(`A fresh idea on the table, ${S.name}.`, p); }
+  if ((m = c.match(/^(?:add|place|spawn|bring in)\s+(?:a |an |the |another )?(.+)$/))) {
+    const item = CATALOG.find(x => x.re.test(m[1]));
+    if (item) { addProp(item.type); return say(`${item.name} placed. Drag it where you like.`, p); }
+  }
+  if (/^(build mode( on)?|(start|enter|engage) build( mode)?)$/.test(c)) { setBuild(true); return; }
+  if (/^(build mode off|(stop|exit|leave) build( mode)?)$/.test(c)) { setBuild(false); return; }
+  if (/^empty (the )?bin$/.test(c)) { emptyBin(); return say('Bin emptied.', p); }
   if (/^(start|begin|engage)\s+(a\s+)?(focus|timer|pomodoro)/.test(c) || c === 'focus') { if (!running) toggleTimer(); return say(`Focus engaged. ${S.focusLen[0]} minutes.`, p); }
   if (/^(stop|pause)(\s+(the\s+)?(focus|timer))?$/.test(c)) { if (running) toggleTimer(); return say('Paused.', p); }
   if (/\btime\b/.test(c) && c.split(' ').length <= 5) return say(`It's ${hm()}, ${S.name}.`, p);
@@ -444,7 +531,7 @@ async function testOllama(silent) {
   if (mode === 'status') renderPanel('status');
   if (!silent) say(chipState === 'on' ? `Ollama linked, ${S.name}. Running ${S.ollama.model.split(':')[0]}.` : `Ollama is not responding, ${S.name}.`);
 }
-const clean = s => String(s).replace(/<think>[\s\S]*?(<\/think>|$)/gi, '').replace(/[*_#`>]+/g, '').replace(/\n{3,}/g, '\n\n').trim();
+const cleanTxt = s => String(s).replace(/<think>[\s\S]*?(<\/think>|$)/gi, '').replace(/[*_#`>]+/g, '').replace(/\n{3,}/g, '\n\n').trim();
 function sysPrompt(p) {
   const open = openTasks().map(t => t.text).slice(0, 10);
   return `You are ${pName(p)}, the voice of Nomad, a personal workstation built by Nomad Industries for its owner, a chiropractic student. ` +
@@ -452,7 +539,8 @@ function sysPrompt(p) {
     `Be brief: under 70 words unless asked for detail. Plain sentences only, no markdown, lists or emoji, because replies are read aloud. ` +
     `Be accurate; if you are unsure, say so plainly.\n` +
     `Context. Time: ${new Date().toLocaleString()}. Open tasks: ${open.length ? open.join('; ') : 'none'}. ` +
-    `Focus sessions today: ${S.sessions.n}. Apps on the workstation: ${S.apps.map(a => a.name).join(', ')}.`;
+    `Focus sessions today: ${S.sessions.n}. Apps: ${S.apps.map(a => a.name).join(', ')}. ` +
+    `Ideas on the hologram table: ${S.ideas.length ? S.ideas.map(i => i.title).join(', ') : 'none'}.`;
 }
 let asking = null;
 async function ask(text, p = S.persona) {
@@ -479,10 +567,10 @@ async function ask(text, p = S.persona) {
         const line = buf.slice(0, i).trim(); buf = buf.slice(i + 1); if (!line) continue;
         let j; try { j = JSON.parse(line); } catch (e) { continue; }
         if (j.error) throw new Error(j.error);
-        if (j.message && j.message.content) { out += j.message.content; const shown = clean(out); if (shown) { subtitle(shown, p, true); renderChatLive(shown, p); } }
+        if (j.message && j.message.content) { out += j.message.content; const shown = cleanTxt(out); if (shown) { subtitle(shown, p, true); renderChatLive(shown, p); } }
       }
     }
-    out = clean(out) || `I have nothing useful to add, ${S.name}.`;
+    out = cleanTxt(out) || `I have nothing useful to add, ${S.name}.`;
     S.chat.push({ role: 'assistant', content: out, p }); S.chat = S.chat.slice(-30); save();
     renderChat(); drawScreen('chat'); setChip('on');
     subtitle(out, p);
@@ -545,12 +633,10 @@ function findVert(q) {
   if (m[1] === 'l' && n >= 1 && n <= 5) return n + 18;
   return -1;
 }
-function selectVert(i) {
-  selVert = i; paintSpine();
-  if (mode === 'spine') renderPanel('spine');
-}
+function selectVert(i) { selVert = i; paintSpine(); if (mode === 'spine') renderPanel('spine'); }
 
-/* =================== SCREEN DRAWINGS (textures on the 3D monitors) =================== */
+/* =================== SCREEN DRAWINGS (crisp: drawn at 2× resolution) =================== */
+const SC = 2;
 const F = (w, s) => `${w} ${s}px "JetBrains Mono", ui-monospace, Menlo, monospace`;
 function fit(ctx, t, max) { t = String(t); if (ctx.measureText(t).width <= max) return t; while (t.length > 1 && ctx.measureText(t + '…').width > max) t = t.slice(0, -1); return t + '…'; }
 function wrap(ctx, text, max) {
@@ -621,9 +707,9 @@ const DRAW = {
     ctx.fillStyle = '#46d9ff'; ctx.font = F(600, 74); ctx.fillText(hm(), 24, 62);
     ctx.fillStyle = '#7f93ad'; ctx.font = F(400, 15);
     ctx.fillText(new Date().toLocaleDateString([], { weekday: 'long', day: 'numeric', month: 'long' }).toUpperCase(), 26, 146);
-    const rows = [['VOICE', pName().toUpperCase()], ['OLLAMA', chipState === 'on' ? (S.ollama.model || 'LINKED').toUpperCase() : 'OFFLINE'], ['TASKS', `${openTasks().length} OPEN`]];
+    const rows = [['VOICE', pName().toUpperCase()], ['OLLAMA', chipState === 'on' ? (S.ollama.model || 'LINKED').toUpperCase() : 'OFFLINE'], ['TASKS', `${openTasks().length} OPEN`], ['IDEAS', `${S.ideas.length}`]];
     ctx.font = F(400, 15);
-    rows.forEach(([k, v], i) => { ctx.fillStyle = '#7f93ad'; ctx.fillText(k, W * 0.55, 72 + i * 28); ctx.fillStyle = k === 'OLLAMA' && chipState !== 'on' ? '#ff6b6b' : '#ffb547'; ctx.fillText(fit(ctx, v, W * 0.45 - 110), W * 0.55 + 90, 72 + i * 28); });
+    rows.forEach(([k, v], i) => { ctx.fillStyle = '#7f93ad'; ctx.fillText(k, W * 0.55, 66 + i * 26); ctx.fillStyle = k === 'OLLAMA' && chipState !== 'on' ? '#ff6b6b' : '#ffb547'; ctx.fillText(fit(ctx, v, W * 0.45 - 110), W * 0.55 + 90, 66 + i * 26); });
     ctx.textAlign = 'right'; ctx.fillStyle = 'rgba(70,217,255,.5)'; ctx.font = F(600, 13); ctx.fillText('NOMAD INDUSTRIES', W - 22, H - 32);
   },
   chat(ctx, W, H) {
@@ -663,8 +749,134 @@ const DRAW = {
     ctx.fillStyle = '#ffb547'; ctx.font = F(600, 16); ctx.fillText('MOVE FREELY. LIVE FULLY.', 38, H - 64);
   }
 };
-function drawScreen(key) { const s = screens[key]; if (!s) return; DRAW[key](s.ctx, s.W, s.H); s.tex.needsUpdate = true; }
+function drawScreen(key) {
+  const s = screens[key]; if (!s) return;
+  s.ctx.setTransform(SC, 0, 0, SC, 0, 0);
+  DRAW[key](s.ctx, s.W, s.H); s.tex.needsUpdate = true;
+}
 function refreshScreens() { Object.keys(screens).forEach(drawScreen); }
+
+/* =================== 3D HELPERS =================== */
+let M = null;
+const GEO = {}, EDGE = {};
+const COL = { line: 0x3fa9f5, dim: 0x15304d, hi: 0xffb547, cyan: 0xc8f6ff, red: 0xff6b6b, white: 0xffffff };
+const V3 = (x, y, z) => new THREE.Vector3(x, y, z);
+function initMats() {
+  const add = THREE.AdditiveBlending;
+  M = {
+    fill: new THREE.MeshBasicMaterial({ color: 0x081626, polygonOffset: true, polygonOffsetFactor: 1, polygonOffsetUnits: 1 }),
+    line: new THREE.LineBasicMaterial({ color: COL.line, transparent: true, opacity: 0.7 }),
+    dim: new THREE.LineBasicMaterial({ color: COL.dim }),
+    led: new THREE.MeshBasicMaterial({ color: 0x46d9ff, fog: false }),
+    ledRed: new THREE.MeshBasicMaterial({ color: 0xff6b6b, fog: false }),
+    holoFill: new THREE.MeshBasicMaterial({ color: 0x46d9ff, transparent: true, opacity: 0.07, depthWrite: false, blending: add, fog: false }),
+    holoLine: new THREE.LineBasicMaterial({ color: 0x8feeff, transparent: true, opacity: 0.95, blending: add, fog: false }),
+    holoSel: new THREE.LineBasicMaterial({ color: 0xffb547, fog: false }),
+    beam: new THREE.MeshBasicMaterial({ color: 0x46d9ff, transparent: true, opacity: 0.045, depthWrite: false, side: THREE.DoubleSide, blending: add, fog: false })
+  };
+  GEO.box = new THREE.BoxGeometry(1, 1, 1);
+  GEO.sphere = new THREE.SphereGeometry(0.5, 14, 10);
+  GEO.cyl = new THREE.CylinderGeometry(0.5, 0.5, 1, 16);
+  GEO.cone = new THREE.ConeGeometry(0.5, 1, 16);
+  GEO.torus = new THREE.TorusGeometry(0.38, 0.12, 6, 22);
+  GEO.prism = new THREE.CylinderGeometry(0.5, 0.5, 1, 3);
+  GEO.ball = new THREE.IcosahedronGeometry(0.045, 0);
+  Object.keys(GEO).forEach(k => { EDGE[k] = new THREE.EdgesGeometry(GEO[k], 25); });
+}
+const newLine = () => new THREE.LineBasicMaterial({ color: COL.line });
+function solid(geo, lm, fm) { const g = new THREE.Group(); g.add(new THREE.Mesh(geo, fm || M.fill)); g.add(new THREE.LineSegments(new THREE.EdgesGeometry(geo, 25), lm || M.line)); return g; }
+function box(par, w, h, d, x, y, z, lm) { const g = solid(new THREE.BoxGeometry(w, h, d), lm); g.position.set(x, y, z); par.add(g); return g; }
+function cyl(par, rt, rb, h, x, y, z, lm, seg) { const g = solid(new THREE.CylinderGeometry(rt, rb, h, seg || 14), lm); g.position.set(x, y, z); par.add(g); return g; }
+function poly(par, pts, lm) { const l = new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts.map(p => V3(p[0], p[1], p[2]))), lm || M.line); par.add(l); return l; }
+function cachedSolid(t, lm, fm) {
+  const g = new THREE.Group();
+  const m = new THREE.Mesh(GEO[t], fm || M.fill); m.userData.cached = true;
+  const e = new THREE.LineSegments(EDGE[t], lm || M.line); e.userData.cached = true;
+  g.add(m); g.add(e); return g;
+}
+function partObj(pt, lm, fm) {
+  const g = cachedSolid(GEO[pt.t] ? pt.t : 'box', lm, fm);
+  g.scale.set(Math.max(0.01, pt.w), Math.max(0.01, pt.h), Math.max(0.01, pt.d));
+  g.position.set(pt.x, pt.y, pt.z); g.rotation.y = (pt.r || 0) * Math.PI / 180;
+  return g;
+}
+function disposeObj(o) {
+  o.traverse(c => { c.userData.dead = true; if (c.geometry && !c.userData.cached) c.geometry.dispose(); });
+  if (o.parent) o.parent.remove(o);
+}
+function seeded(str) { let h = 2166136261; for (const ch of String(str)) h = Math.imul(h ^ ch.charCodeAt(0), 16777619); let s = (h >>> 0) % 2147483646 + 1; return () => (s = (s * 16807) % 2147483647) / 2147483647; }
+
+/* ---- furniture builders (local origin = floor point under the item) ---- */
+const BUILD = {
+  chair(g, lm) { cyl(g, .3, .3, .03, 0, .05, 0, lm, 5); cyl(g, .025, .025, .42, 0, .27, 0, lm, 8); box(g, .5, .07, .48, 0, .5, 0, lm); box(g, .48, .6, .05, 0, .86, .24, lm); box(g, .04, .03, .3, -.27, .68, .02, lm); box(g, .04, .03, .3, .27, .68, .02, lm); },
+  crate(g, lm) { box(g, .46, .4, .46, 0, .2, 0, lm); poly(g, [[-.23, .2, .231], [.23, .2, .231]], lm); poly(g, [[-.23, .02, .231], [.23, .38, .231]], lm); },
+  dumbbell(g, lm) { const h = cyl(g, .015, .015, .36, 0, .06, 0, lm, 8); h.rotation.z = Math.PI / 2; [-.14, .14].forEach(x => { const p = cyl(g, .06, .06, .05, x, .06, 0, lm, 12); p.rotation.z = Math.PI / 2; }); },
+  plant(g, lm) { cyl(g, .1, .07, .17, 0, .085, 0, lm); const l = solid(new THREE.IcosahedronGeometry(.18, 0), lm); l.position.y = .34; g.add(l); },
+  shelf(g, lm, p) {
+    const rnd = seeded(p.id);
+    [1.25, 1.72].forEach((y, s) => {
+      box(g, .3, .03, 1.6, 0, y, 0, lm);
+      poly(g, [[-.15, y - .12, -.65], [.09, y - .015, -.65]], lm); poly(g, [[-.15, y - .12, .65], [.09, y - .015, .65]], lm);
+      let z = -.75;
+      while (z < (s ? .45 : .3)) {
+        const w = .03 + rnd() * .04, h = .17 + rnd() * .12;
+        const b = box(g, .2, h, w, -.02, y + .015 + h / 2, z + w / 2, lm); if (rnd() > .85) b.rotation.x = .18;
+        z += w + .004;
+      }
+    });
+  },
+  tower(g, lm) { box(g, .2, .46, .46, 0, .23, 0, lm); const led = new THREE.Mesh(new THREE.BoxGeometry(.025, .025, .01), M.led); led.position.set(0, .4, .235); g.add(led); poly(g, [[-.07, .12, .231], [.07, .12, .231]], lm); },
+  rack(g, lm) {
+    box(g, .6, 1.8, .7, 0, .9, 0, lm);
+    for (let i = 1; i < 12; i++) poly(g, [[-.27, i * .15, .351], [.27, i * .15, .351]], lm);
+    for (let i = 0; i < 10; i++) { const l = new THREE.Mesh(new THREE.BoxGeometry(.03, .02, .01), i % 3 ? M.led : M.ledRed); l.position.set(.22, .2 + i * .15, .355); g.add(l); }
+  },
+  guitar(g, lm) {
+    poly(g, [[-.15, 0, .15], [0, .5, 0], [.15, 0, .15]], lm); poly(g, [[0, 0, -.2], [0, .5, 0]], lm);
+    const b = new THREE.Group(); b.rotation.x = -.18; b.position.z = .05; g.add(b);
+    const d1 = cyl(b, .17, .17, .08, 0, .42, 0, lm, 18); d1.rotation.x = Math.PI / 2;
+    const d2 = cyl(b, .13, .13, .08, 0, .66, 0, lm, 18); d2.rotation.x = Math.PI / 2;
+    box(b, .05, .55, .03, 0, 1.0, 0, lm); box(b, .08, .14, .03, 0, 1.34, 0, lm);
+    for (let i = -2; i <= 2; i++) poly(b, [[i * .008, .45, .045], [i * .008, 1.3, .02]], lm);
+  },
+  lamp(g, lm) { cyl(g, .16, .18, .03, 0, .015, 0, lm, 16); cyl(g, .012, .012, 1.5, 0, .77, 0, lm, 6); cyl(g, .1, .22, .22, 0, 1.55, 0, lm, 16); },
+  drop(g, lm) {
+    [[-.22, -.75], [.22, -.75], [-.22, .75], [.22, .75]].forEach(([x, z]) => box(g, .05, .52, .05, x, .26, z, lm));
+    box(g, .5, .05, 1.6, 0, .3, 0, lm);
+    [[.38, .7], [.45, .25], [.42, -.23], [.35, -.65]].forEach(([d, z]) => box(g, .55, .08, d, 0, .6, z, lm));
+    cyl(g, .07, .07, .005, 0, .645, .78, lm, 12);
+    [.52, .1, -.42].forEach(z => box(g, .45, .25, .04, 0, .42, z, lm));
+  },
+  whiteboard(g, lm) {
+    poly(g, [[-.5, 0, .25], [-.5, 1.7, 0], [-.5, 0, -.25]], lm); poly(g, [[.5, 0, .25], [.5, 1.7, 0], [.5, 0, -.25]], lm);
+    box(g, 1.2, .8, .03, 0, 1.25, .02, lm);
+    poly(g, [[-.45, 1.4, .04], [-.2, 1.5, .04], [0, 1.35, .04], [.25, 1.45, .04]], lm);
+    poly(g, [[-.45, 1.15, .04], [.35, 1.15, .04]], lm); poly(g, [[-.45, 1.05, .04], [.1, 1.05, .04]], lm);
+  },
+  beanbag(g, lm) { const s = solid(new THREE.SphereGeometry(.42, 12, 8), lm); s.scale.set(1, .55, 1); s.position.y = .23; g.add(s); },
+  cabinet(g, lm) { box(g, .45, 1.1, .6, 0, .55, 0, lm); [.3, .55, .8].forEach(y => poly(g, [[-.2, y, .301], [.2, y, .301]], lm)); [.18, .43, .68, .93].forEach(y => box(g, .12, .02, .02, 0, y, .31, lm)); },
+  printer(g, lm) {
+    [[-.21, -.21], [.21, -.21], [-.21, .21], [.21, .21]].forEach(([x, z]) => box(g, .03, .55, .03, x, .275, z, lm));
+    box(g, .46, .04, .46, 0, .02, 0, lm); box(g, .46, .03, .05, 0, .54, -.21, lm); box(g, .46, .03, .05, 0, .54, .21, lm);
+    box(g, .32, .01, .32, 0, .16, 0, lm); box(g, .44, .02, .03, 0, .4, 0, lm); box(g, .05, .07, .05, .05, .36, 0, lm);
+    cyl(g, .06, .06, .1, 0, .2, 0, lm, 12);
+  },
+  drone(g, lm) {
+    poly(g, [[0, 0, 0], [0, .02, 0]], lm);
+    const d = new THREE.Group(); d.position.y = 1.1; d.userData.anim = 'hover'; d.userData.y0 = 1.1; g.add(d);
+    box(d, .12, .04, .12, 0, 0, 0, lm);
+    [[1, 1], [1, -1], [-1, 1], [-1, -1]].forEach(([a, b]) => { poly(d, [[0, 0, 0], [a * .14, 0, b * .14]], lm); cyl(d, .06, .06, .005, a * .14, .02, b * .14, lm, 16); });
+    const eye = new THREE.Mesh(new THREE.BoxGeometry(.03, .015, .01), M.led); eye.position.set(0, 0, .062); d.add(eye);
+  },
+  reactor(g, lm) {
+    cyl(g, .18, .22, .6, 0, .3, 0, lm, 8);
+    const r = new THREE.Group(); r.position.y = .85; r.userData.anim = 'spin'; g.add(r);
+    r.add(solid(new THREE.TorusGeometry(.18, .025, 6, 24), lm));
+    const r2 = solid(new THREE.TorusGeometry(.12, .012, 4, 20), lm); r2.rotation.x = Math.PI / 2; r.add(r2);
+    r.add(new THREE.Mesh(new THREE.SphereGeometry(.05, 10, 8), M.led));
+  },
+  custom(g, lm, p) { (p.parts || []).forEach(pt => g.add(partObj(pt, lm))); }
+};
 
 /* =================== 3D ROOM =================== */
 function initScene() {
@@ -674,62 +886,47 @@ function initScene() {
   let renderer;
   try { renderer = new THREE.WebGLRenderer({ canvas: cv, antialias: true, powerPreference: 'low-power' }); } catch (e) { return false; }
   if (!renderer.getContext()) return false;
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.5));
+  initMats();
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
   renderer.setSize(innerWidth, innerHeight, false);
   renderer.setClearColor(0x06101c, 1);
-  const scene = new THREE.Scene(); scene.fog = new THREE.Fog(0x06101c, 5.5, 11.5);
+  const maxAniso = renderer.capabilities.getMaxAnisotropy();
+  const scene = new THREE.Scene(); scene.fog = new THREE.Fog(0x06101c, 6, 12.5);
   const camera = new THREE.PerspectiveCamera(42, innerWidth / innerHeight, 0.05, 40);
-  const C = { line: 0x3fa9f5, dim: 0x15304d, fill: 0x081626, hi: 0xffb547, cyan: 0xb8f4ff };
-  const V = (x, y, z) => new THREE.Vector3(x, y, z);
-  const fill = new THREE.MeshBasicMaterial({ color: C.fill, polygonOffset: true, polygonOffsetFactor: 1, polygonOffsetUnits: 1 });
-  const lineMat = new THREE.LineBasicMaterial({ color: C.line, transparent: true, opacity: 0.7 });
-  const dimMat = new THREE.LineBasicMaterial({ color: C.dim });
   const hot = [], hotMats = {}, views = {};
-  const newLine = () => new THREE.LineBasicMaterial({ color: C.line });
-
-  function solid(geo, lm) { const g = new THREE.Group(); g.add(new THREE.Mesh(geo, fill)); g.add(new THREE.LineSegments(new THREE.EdgesGeometry(geo, 25), lm || lineMat)); return g; }
-  function box(par, w, h, d, x, y, z, lm) { const g = solid(new THREE.BoxGeometry(w, h, d), lm); g.position.set(x, y, z); par.add(g); return g; }
-  function cyl(par, rt, rb, h, x, y, z, lm, seg) { const g = solid(new THREE.CylinderGeometry(rt, rb, h, seg || 14), lm); g.position.set(x, y, z); par.add(g); return g; }
-  function poly(par, pts, lm) { const l = new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts.map(p => V(p[0], p[1], p[2]))), lm || lineMat); par.add(l); return l; }
   function gridPlane(w, h, step) {
     const pos = [];
     for (let x = -w / 2; x <= w / 2 + 1e-6; x += step) pos.push(x, -h / 2, 0, x, h / 2, 0);
     for (let y = -h / 2; y <= h / 2 + 1e-6; y += step) pos.push(-w / 2, y, 0, w / 2, y, 0);
     const geo = new THREE.BufferGeometry(); geo.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
-    return new THREE.LineSegments(geo, dimMat);
+    return new THREE.LineSegments(geo, M.dim);
   }
   function hotspot(key, obj, lm) { obj.traverse(o => { if (o.isMesh) { o.userData.hotspot = key; hot.push(o); } }); if (lm) (hotMats[key] = hotMats[key] || []).push(lm); }
   function makeScreen(key, w, h, px) {
     const W = px || 512, H = Math.round(W * h / w);
-    const canvas = document.createElement('canvas'); canvas.width = W; canvas.height = H;
-    const tex = new THREE.CanvasTexture(canvas); tex.minFilter = THREE.LinearFilter; tex.generateMipmaps = false;
+    const canvas = document.createElement('canvas'); canvas.width = W * SC; canvas.height = H * SC;
+    const tex = new THREE.CanvasTexture(canvas);
+    tex.anisotropy = maxAniso; tex.minFilter = THREE.LinearMipmapLinearFilter; tex.magFilter = THREE.LinearFilter;
     const mesh = new THREE.Mesh(new THREE.PlaneGeometry(w, h), new THREE.MeshBasicMaterial({ map: tex, fog: false }));
     screens[key] = { ctx: canvas.getContext('2d'), tex, W, H };
     return mesh;
   }
-  let seed = 7; const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
 
-  // --- room shell: floor + two walls, blueprint grid ---
+  // --- room shell ---
   const floor = gridPlane(6, 5, 0.25); floor.rotation.x = -Math.PI / 2; scene.add(floor);
   const back = gridPlane(6, 3, 0.25); back.position.set(0, 1.5, -2.5); scene.add(back);
   const left = gridPlane(5, 3, 0.25); left.rotation.y = Math.PI / 2; left.position.set(-3, 1.5, 0); scene.add(left);
   poly(scene, [[-3, 0, 2.5], [-3, 0, -2.5], [3, 0, -2.5], [3, 3, -2.5], [-3, 3, -2.5], [-3, 3, 2.5], [-3, 0, 2.5]]);
-  poly(scene, [[-3, 0, -2.5], [-3, 3, -2.5]]); poly(scene, [[3, 0, -2.5], [3, 0, 2.5]], dimMat);
-  // window on left wall
+  poly(scene, [[-3, 0, -2.5], [-3, 3, -2.5]]); poly(scene, [[3, 0, -2.5], [3, 0, 2.5]], M.dim);
   poly(scene, [[-2.99, 1.0, 1.3], [-2.99, 2.15, 1.3], [-2.99, 2.15, 2.3], [-2.99, 1.0, 2.3], [-2.99, 1.0, 1.3]]);
   poly(scene, [[-2.99, 1.575, 1.3], [-2.99, 1.575, 2.3]]); poly(scene, [[-2.99, 1.0, 1.8], [-2.99, 2.15, 1.8]]);
-  // rug
-  const rug = []; for (let a = 0; a <= 64; a++) { const t = a / 64 * Math.PI * 2; rug.push([0.2 + Math.cos(t) * 1.3, 0.003, -1.0 + Math.sin(t) * 0.85]); } poly(scene, rug, dimMat);
+  const rug = []; for (let a = 0; a <= 64; a++) { const t = a / 64 * Math.PI * 2; rug.push([0.2 + Math.cos(t) * 1.3, 0.003, -1.0 + Math.sin(t) * 0.85]); } poly(scene, rug, M.dim);
 
-  // --- desk ---
+  // --- desk (fixed) ---
   box(scene, 2.6, 0.05, 0.85, 0, 0.75, -2.05);
   [[-1.25, -1.67], [-1.25, -2.43]].forEach(([x, z]) => box(scene, 0.05, 0.73, 0.05, x, 0.365, z));
-  box(scene, 0.5, 0.72, 0.8, 1.02, 0.36, -2.05);                                   // drawer unit
+  box(scene, 0.5, 0.72, 0.8, 1.02, 0.36, -2.05);
   [0.15, 0.39, 0.6].forEach(y => poly(scene, [[0.8, y, -1.645], [1.24, y, -1.645]]));
-  const tower = box(scene, 0.2, 0.46, 0.46, -0.95, 0.23, -2.08);                   // PC tower
-  const led = new THREE.Mesh(new THREE.BoxGeometry(0.025, 0.025, 0.01), new THREE.MeshBasicMaterial({ color: 0x46d9ff, fog: false }));
-  led.position.set(-0.95, 0.4, -1.845); scene.add(led);
-  poly(scene, [[-1.02, 0.12, -1.85], [-0.88, 0.12, -1.85]], dimMat);
 
   // --- monitors ---
   function monitor(key, w, h, x, y, z, ry, rx) {
@@ -746,7 +943,7 @@ function initScene() {
   const sFocus = monitor('focus', 0.6, 0.36, 0.86, 1.08, -2.12, -0.5);
   const sStatus = monitor('status', 0.78, 0.42, 0, 1.73, -2.35, 0, 0.1);
 
-  // --- laptop (console) ---
+  // --- laptop ---
   const llm = newLine(); const lg = new THREE.Group(); lg.position.set(0.72, 0.775, -1.82); lg.rotation.y = -0.35; scene.add(lg);
   box(lg, 0.34, 0.016, 0.24, 0, 0.008, 0, llm);
   const hinge = new THREE.Group(); hinge.position.set(0, 0.016, -0.12); hinge.rotation.x = -0.28; lg.add(hinge);
@@ -754,50 +951,22 @@ function initScene() {
   const sChat = makeScreen('chat', 0.31, 0.19, 400); sChat.position.set(0, 0.11, 0.0065); hinge.add(sChat);
   hotspot('chat', lg, llm);
 
-  // --- desk clutter ---
+  // --- desk clutter (fixed) ---
   box(scene, 0.44, 0.02, 0.14, -0.05, 0.785, -1.78);
-  for (let i = 0; i < 12; i++) poly(scene, [[-0.25 + i * 0.035, 0.796, -1.83], [-0.25 + i * 0.035, 0.796, -1.73]], dimMat);
+  for (let i = 0; i < 12; i++) poly(scene, [[-0.25 + i * 0.035, 0.796, -1.83], [-0.25 + i * 0.035, 0.796, -1.73]], M.dim);
   box(scene, 0.06, 0.02, 0.1, 0.3, 0.785, -1.74);
-  cyl(scene, 0.04, 0.035, 0.1, -0.52, 0.825, -1.76);                                  // mug
+  cyl(scene, 0.04, 0.035, 0.1, -0.52, 0.825, -1.76);
   poly(scene, [[-0.48, 0.85, -1.76], [-0.45, 0.84, -1.76], [-0.45, 0.8, -1.76], [-0.48, 0.79, -1.76]]);
   [[0.24, 0.05, 0.17], [0.22, 0.04, 0.16], [0.2, 0.06, 0.15], [0.23, 0.035, 0.17]].reduce((y, [w, h, d], i) => { const b = box(scene, w, h, d, -1.08, y + h / 2, -2.28); b.rotation.y = (i % 2 ? 0.12 : -0.08); return y + h; }, 0.775);
-  [[-0.32, -1.95, 0.3], [-0.26, -1.92, -0.2], [0.42, -2.0, 0.15]].forEach(([x, z, r]) => { const p = box(scene, 0.21, 0.003, 0.29, x, 0.778, z, dimMat); p.rotation.y = r; });
-  cyl(scene, 0.07, 0.08, 0.02, -1.18, 0.785, -2.38);                                  // lamp (tucked behind the books)
+  [[-0.32, -1.95, 0.3], [-0.26, -1.92, -0.2], [0.42, -2.0, 0.15]].forEach(([x, z, r]) => { const p = box(scene, 0.21, 0.003, 0.29, x, 0.778, z, M.dim); p.rotation.y = r; });
+  cyl(scene, 0.07, 0.08, 0.02, -1.18, 0.785, -2.38);
   poly(scene, [[-1.18, 0.79, -2.38], [-1.22, 1.3, -2.4], [-1.05, 1.42, -2.3]]);
   const shade = cyl(scene, 0.02, 0.08, 0.1, -1.03, 1.37, -2.28); shade.rotation.z = 0.5;
-  poly(scene, [[0, 0.9, -2.3], [0.05, 0.55, -2.42], [0.2, 0.02, -2.44], [0.9, 0.02, -2.42]], dimMat);   // cables
-  poly(scene, [[-0.86, 0.95, -2.2], [-0.8, 0.5, -2.4], [-0.95, 0.46, -2.3]], dimMat);
-  poly(scene, [[0.86, 0.95, -2.2], [0.7, 0.5, -2.42], [0.75, 0.02, -2.44]], dimMat);
+  poly(scene, [[0, 0.9, -2.3], [0.05, 0.55, -2.42], [0.2, 0.02, -2.44], [0.9, 0.02, -2.42]], M.dim);
+  poly(scene, [[-0.86, 0.95, -2.2], [-0.8, 0.5, -2.4], [-0.95, 0.46, -2.3]], M.dim);
+  poly(scene, [[0.86, 0.95, -2.2], [0.7, 0.5, -2.42], [0.75, 0.02, -2.44]], M.dim);
 
-  // --- chair ---
-  const ch = new THREE.Group(); ch.position.set(0.15, 0, -1.05); ch.rotation.y = 0.25; scene.add(ch);
-  cyl(ch, 0.3, 0.3, 0.03, 0, 0.05, 0, null, 5); cyl(ch, 0.025, 0.025, 0.42, 0, 0.27, 0, null, 8);
-  box(ch, 0.5, 0.07, 0.48, 0, 0.5, 0); box(ch, 0.48, 0.6, 0.05, 0, 0.86, 0.24);
-  box(ch, 0.04, 0.03, 0.3, -0.27, 0.68, 0.02); box(ch, 0.04, 0.03, 0.3, 0.27, 0.68, 0.02);
-
-  // --- shelves + books on left wall ---
-  [1.25, 1.72].forEach((y, s) => {
-    box(scene, 0.3, 0.03, 1.6, -2.84, y, -1.2);
-    poly(scene, [[-2.99, y - 0.12, -1.85], [-2.75, y - 0.015, -1.85]], dimMat);
-    poly(scene, [[-2.99, y - 0.12, -0.55], [-2.75, y - 0.015, -0.55]], dimMat);
-    let z = -1.95;
-    while (z < (s ? -0.75 : -0.9)) {
-      const w = 0.03 + rnd() * 0.04, h = 0.17 + rnd() * 0.12;
-      const b = box(scene, 0.2, h, w, -2.86, y + 0.015 + h / 2, z + w / 2); if (rnd() > 0.85) b.rotation.x = 0.18;
-      z += w + 0.004;
-    }
-  });
-  cyl(scene, 0.07, 0.05, 0.12, -2.84, 1.325, -0.6);                                  // plant
-  const leaves = solid(new THREE.IcosahedronGeometry(0.13, 0)); leaves.position.set(-2.84, 1.5, -0.6); scene.add(leaves);
-  box(scene, 0.22, 0.16, 0.26, -2.84, 1.815, -0.62);                                 // storage box
-
-  // --- floor clutter ---
-  box(scene, 0.46, 0.4, 0.46, 2.3, 0.2, -2.05); const bx = box(scene, 0.34, 0.28, 0.34, 2.26, 0.54, -2.1); bx.rotation.y = 0.3;
-  const db = new THREE.Group(); db.position.set(1.15, 0.06, -0.9); db.rotation.y = 0.6; scene.add(db);
-  const hnd = cyl(db, 0.015, 0.015, 0.36, 0, 0, 0, null, 8); hnd.rotation.z = Math.PI / 2;
-  [-0.14, 0.14].forEach(x => { const pl = cyl(db, 0.06, 0.06, 0.05, x, 0, 0, null, 12); pl.rotation.z = Math.PI / 2; });
-
-  // --- pinboard (notes) + poster ---
+  // --- pinboard + poster ---
   const plm = newLine(); const pg = new THREE.Group(); pg.position.set(2.05, 1.55, -2.47); scene.add(pg);
   box(pg, 1.1, 0.75, 0.025, 0, 0, 0, plm);
   const sNotes = makeScreen('notes', 1.04, 0.69, 512); sNotes.position.z = 0.014; pg.add(sNotes);
@@ -836,26 +1005,62 @@ function initScene() {
     y -= s.h / 2 + s.g;
   });
 
-  // --- camera views for each station ---
+  // --- the bin ---
+  const binLm = newLine(); const binG = new THREE.Group(); binG.position.set(BIN.x, 0, BIN.z); scene.add(binG);
+  const binBody = solid(new THREE.CylinderGeometry(0.17, 0.13, 0.4, 18, 1, true), binLm); binBody.position.y = 0.2; binG.add(binBody);
+  cyl(binG, 0.13, 0.13, 0.01, 0, 0.005, 0, binLm, 18);
+  const rim = new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.TorusGeometry(0.17, 0.008, 4, 24), 1), binLm); rim.rotation.x = Math.PI / 2; rim.position.y = 0.4; binG.add(rim);
+  for (let a = 0; a < 12; a++) { const t = a / 12 * Math.PI * 2; poly(binG, [[Math.cos(t) * .13, .02, Math.sin(t) * .13], [Math.cos(t) * .168, .39, Math.sin(t) * .168]], binLm); }
+  const binBalls = new THREE.Group(); binG.add(binBalls);
+  hotspot('bin', binG, binLm);
+
+  // --- hologram table ---
+  const hlm = newLine(); const hg = new THREE.Group(); hg.position.set(HOLO.x, 0, HOLO.z); scene.add(hg);
+  cyl(hg, 0.22, 0.3, 0.04, 0, 0.02, 0, hlm, 24);
+  cyl(hg, 0.1, 0.16, 0.72, 0, 0.4, 0, hlm, 12);
+  cyl(hg, 0.55, 0.5, 0.05, 0, 0.785, 0, hlm, 32);
+  const emitter = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.12, 0.012, 24), M.led); emitter.position.y = 0.815; hg.add(emitter);
+  const beam = new THREE.Mesh(new THREE.CylinderGeometry(0.5, 0.42, 1.0, 28, 1, true), M.beam); beam.position.y = 1.32; hg.add(beam);
+  const ringPts = []; for (let a = 0; a <= 48; a++) { const t = a / 48 * Math.PI * 2; ringPts.push(V3(Math.cos(t) * 0.46, 0, Math.sin(t) * 0.46)); }
+  const scan = new THREE.Line(new THREE.BufferGeometry().setFromPoints(ringPts), M.holoLine); hg.add(scan);
+  const holoContent = new THREE.Group(); holoContent.position.y = 0.86; hg.add(holoContent);
+  hotspot('holo', hg, hlm);
+
+  // --- camera views for stations ---
   scene.updateMatrixWorld(true);
   function viewFor(obj, dist, lift) {
-    const p = obj.getWorldPosition(V(0, 0, 0)); const n = V(0, 0, 1).transformDirection(obj.matrixWorld);
-    return { pos: p.clone().addScaledVector(n, dist).add(V(0, lift || 0.03, 0)), tgt: p };
+    const p = obj.getWorldPosition(V3(0, 0, 0)); const n = V3(0, 0, 1).transformDirection(obj.matrixWorld);
+    return { pos: p.clone().addScaledVector(n, dist).add(V3(0, lift || 0.03, 0)), tgt: p };
   }
   views.apps = viewFor(sApps, 1.25); views.tasks = viewFor(sTasks, 1.0); views.focus = viewFor(sFocus, 1.0);
   views.status = viewFor(sStatus, 1.1); views.chat = viewFor(sChat, 0.55, 0.02); views.notes = viewFor(sNotes, 1.3);
-  views.spine = { pos: V(-1.05, 1.45, 0.1), tgt: V(-1.95, 1.4, -1.45) };
+  views.spine = { pos: V3(-1.05, 1.45, 0.1), tgt: V3(-1.95, 1.4, -1.45) };
+  views.holo = { pos: V3(HOLO.x + 0.15, 1.95, HOLO.z + 1.45), tgt: V3(HOLO.x, 1.15, HOLO.z) };
+  views.bin = { pos: V3(BIN.x + 0.25, 1.05, BIN.z + 1.0), tgt: V3(BIN.x, 0.25, BIN.z) };
 
-  T = { renderer, scene, camera, C, hot, hotMats, views, vertMats, spine, led,
-        orbit: { az: 0.55, pitch: 0.28, r: innerWidth < 760 ? 5.2 : 3.9, tgt: V(0.1, 1.0, -1.45) },
-        ray: new THREE.Raycaster(), ptr: new THREE.Vector2(-9, -9), px: 0, py: 0, needHover: false };
-  const d0 = desired(); T.cur = { pos: d0.pos.clone().add(V(1.2, 0.8, 1.8)), tgt: d0.tgt.clone() };
+  T = { renderer, scene, camera, hot, hotMats, views, vertMats, spine, screensAt: { tasks: sTasks },
+        binG, binLm, binBalls, holoContent, scan, propObjs: {}, propHot: [], anims: [], flights: [], grows: [],
+        orbit: { az: 0.55, pitch: 0.3, r: innerWidth < 760 ? 5.8 : 4.5, tgt: V3(0, 0.95, -0.95) },
+        ray: new THREE.Raycaster(), ptr: new THREE.Vector2(-9, -9), px: 0, py: 0, needHover: false,
+        plane: new THREE.Plane(V3(0, 1, 0), 0), binFlash: 0 };
+  const d0 = desired(); T.cur = { pos: d0.pos.clone().add(V3(1.2, 0.8, 1.8)), tgt: d0.tgt.clone() };
+
+  S.props.forEach(p => buildPropObj(p));
+  refreshBinBalls(); rebuildHolo();
 
   // --- interaction ---
-  const drag = T.drag = { down: null, active: false };
+  const drag = T.drag = { down: null, active: false, prop: null, off: { x: 0, z: 0 } };
   function setPtr(e) { T.ptr.set((e.clientX / innerWidth) * 2 - 1, -(e.clientY / innerHeight) * 2 + 1); T.px = e.clientX; T.py = e.clientY; T.needHover = true; }
   cv.addEventListener('pointerdown', e => {
-    setPtr(e); drag.down = { x: e.clientX, y: e.clientY, az: T.orbit.az, p: T.orbit.pitch, rot: T.spine.rotation.y }; drag.active = false;
+    setPtr(e); doHover();
+    drag.down = { x: e.clientX, y: e.clientY, az: T.orbit.az, p: T.orbit.pitch, rot: T.spine.rotation.y }; drag.active = false;
+    drag.prop = buildMode && hoverProp ? hoverProp : null;
+    if (drag.prop) {
+      const p = getProp(drag.prop); T.plane.constant = -(p.y || 0);
+      const h = V3(0, 0, 0);
+      drag.off = T.ray.ray.intersectPlane(T.plane, h) ? { x: p.x - h.x, z: p.z - h.z } : { x: 0, z: 0 };
+      selProp = drag.prop; paintProps();
+    }
     try { cv.setPointerCapture(e.pointerId); } catch (_) {}
   });
   cv.addEventListener('pointermove', e => {
@@ -864,21 +1069,41 @@ function initScene() {
     const dx = e.clientX - drag.down.x, dy = e.clientY - drag.down.y;
     if (Math.abs(dx) + Math.abs(dy) > 5) drag.active = true;
     if (!drag.active) return;
+    if (drag.prop) {
+      T.ray.setFromCamera(T.ptr, T.camera);
+      const h = V3(0, 0, 0);
+      if (T.ray.ray.intersectPlane(T.plane, h)) {
+        const p = getProp(drag.prop); const o = T.propObjs[p.id];
+        p.x = clamp(h.x + drag.off.x, -2.85, 2.85); p.z = clamp(h.z + drag.off.z, -2.4, 2.4);
+        if (o) o.position.set(p.x, p.y || 0, p.z);
+        const near = nearBin(p); setBinHot(near);
+        const tip = $('tip'); tip.textContent = near ? 'RELEASE TO BIN' : `${(p.label || '').toUpperCase()} · MOVING`;
+        tip.classList.toggle('bad', near); tip.style.left = (T.px + 14) + 'px'; tip.style.top = (T.py + 14) + 'px'; tip.classList.add('show');
+      }
+      return;
+    }
     if (mode === 'spine') T.spine.rotation.y = drag.down.rot + dx * 0.012;
-    else if (mode === 'overview') { T.orbit.az = clamp(drag.down.az - dx * 0.004, -0.5, 1.1); T.orbit.pitch = clamp(drag.down.p + dy * 0.003, 0.06, 0.7); }
+    else if (!T.views[mode]) { T.orbit.az = clamp(drag.down.az - dx * 0.004, -0.6, 1.2); T.orbit.pitch = clamp(drag.down.p + dy * 0.003, 0.06, 0.75); }
   });
-  cv.addEventListener('pointerup', () => { if (drag.down && !drag.active) sceneClick(); drag.down = null; drag.active = false; });
+  cv.addEventListener('pointerup', () => {
+    if (drag.prop) {
+      const id = drag.prop;
+      if (drag.active) { const p = getProp(id); if (p && nearBin(p)) binProp(id); else { save(); if (mode === 'item') renderPanel('item'); } setBinHot(false); $('tip').classList.remove('bad'); }
+      else selectProp(id);
+    } else if (drag.down && !drag.active) sceneClick();
+    drag.down = null; drag.active = false; drag.prop = null; T.needHover = true;
+  });
   cv.addEventListener('pointerleave', () => { $('tip').classList.remove('show'); });
-  cv.addEventListener('wheel', e => { if (mode === 'overview') { T.orbit.r = clamp(T.orbit.r + e.deltaY * 0.002, 2.2, 5.6); e.preventDefault(); } }, { passive: false });
+  cv.addEventListener('wheel', e => { if (!T.views[mode]) { T.orbit.r = clamp(T.orbit.r + e.deltaY * 0.002, 2.2, 6.5); e.preventDefault(); } }, { passive: false });
   addEventListener('resize', () => { T.renderer.setSize(innerWidth, innerHeight, false); T.camera.aspect = innerWidth / innerHeight; updateViewOffset(); });
 
   requestAnimationFrame(loop);
   return true;
 }
 function desired() {
-  if (mode !== 'overview' && T.views[mode]) return T.views[mode];
+  if (T.views[mode]) return T.views[mode];
   const o = T.orbit, cp = Math.cos(o.pitch);
-  return { pos: new THREE.Vector3(o.tgt.x + o.r * cp * Math.sin(o.az), o.tgt.y + o.r * Math.sin(o.pitch), o.tgt.z + o.r * cp * Math.cos(o.az)), tgt: o.tgt };
+  return { pos: V3(o.tgt.x + o.r * cp * Math.sin(o.az), o.tgt.y + o.r * Math.sin(o.pitch), o.tgt.z + o.r * cp * Math.cos(o.az)), tgt: o.tgt };
 }
 let lastT = 0;
 function loop(t) {
@@ -889,36 +1114,67 @@ function loop(t) {
   const d = desired();
   T.cur.pos.lerp(d.pos, 0.08); T.cur.tgt.lerp(d.tgt, 0.08);
   T.camera.position.copy(T.cur.pos); T.camera.lookAt(T.cur.tgt);
-  if (mode !== 'spine' && !T.drag.active) T.spine.rotation.y += 0.005;
-  T.led.visible = Math.floor(t / 800) % 2 === 0;
-  if (T.needHover) { T.needHover = false; doHover(); }
+  if (mode !== 'spine' && !(T.drag.active && !T.drag.prop)) T.spine.rotation.y += 0.005;
+  M.led.color.setHex(Math.floor(t / 800) % 2 ? 0x46d9ff : 0x1a6f8c);
+  T.holoContent.rotation.y += 0.006;
+  T.scan.position.y = 0.85 + ((t / 2600) % 1) * 0.9;
+  T.anims = T.anims.filter(o => !o.userData.dead);
+  T.anims.forEach(o => { if (o.userData.anim === 'spin') { o.rotation.y += 0.03; o.rotation.x = Math.sin(t / 900) * 0.3; } else { o.position.y = o.userData.y0 + Math.sin(t / 600) * 0.04; o.rotation.y += 0.01; } });
+  if (T.flights.length) {
+    const now = performance.now();
+    T.flights = T.flights.filter(f => {
+      const k = clamp((now - f.t0) / f.dur, 0, 1), e = k * k * (3 - 2 * k);
+      f.obj.position.lerpVectors(f.from, f.to, e); f.obj.position.y += Math.sin(Math.PI * k) * 0.55;
+      f.obj.scale.copy(f.s0).multiplyScalar(Math.max(0.05, 1 - e * 0.92)); f.obj.rotation.y += 0.25; f.obj.rotation.x += 0.12;
+      if (k >= 1) { if (f.done) f.done(); T.binFlash = now + 350; return false; }
+      return true;
+    });
+  }
+  if (T.grows.length) {
+    const now = performance.now();
+    T.grows = T.grows.filter(g => { const k = clamp((now - g.t0) / g.dur, 0, 1); g.obj.scale.setScalar(g.s * (1 - Math.pow(1 - k, 3)) + 0.001); return k < 1; });
+  }
+  if (!T.binHot) T.binLm.color.setHex(performance.now() < T.binFlash ? COL.white : hoverKey === 'bin' ? COL.hi : COL.line);
+  if (T.needHover && !T.drag.prop) { T.needHover = false; doHover(); }
   T.renderer.render(T.scene, T.camera);
 }
 function doHover() {
   T.ray.setFromCamera(T.ptr, T.camera);
-  const hit = T.ray.intersectObjects(T.hot, false)[0];
+  const hit = T.ray.intersectObjects(T.hot.concat(T.propHot), false)[0];
   const u = hit ? hit.object.userData : {};
-  const key = u.hotspot || null;
+  const key = u.prop ? null : (u.hotspot || null);
+  const prop = u.prop || null;
   if (key !== hoverKey) {
-    if (hoverKey && T.hotMats[hoverKey]) T.hotMats[hoverKey].forEach(m => m.color.setHex(T.C.line));
-    if (key && T.hotMats[key]) T.hotMats[key].forEach(m => m.color.setHex(T.C.hi));
+    if (hoverKey && T.hotMats[hoverKey] && hoverKey !== 'bin') T.hotMats[hoverKey].forEach(m => m.color.setHex(COL.line));
+    if (key && T.hotMats[key] && key !== 'bin') T.hotMats[key].forEach(m => m.color.setHex(COL.hi));
     hoverKey = key;
   }
+  if (prop !== hoverProp) { hoverProp = prop; paintProps(); }
   hoverVert = key === 'spine' ? (mode === 'spine' ? u.vert : -2) : -1;
   paintSpine();
-  $('scene').classList.toggle('pointer', !!key);
-  const tip = $('tip');
-  if (key) {
-    tip.textContent = key === 'spine' ? (mode === 'spine' ? VN[u.vert] : 'SPINE MODEL') : LABEL(key).toUpperCase();
-    tip.style.left = (T.px + 14) + 'px'; tip.style.top = (T.py + 14) + 'px'; tip.classList.add('show');
-  } else tip.classList.remove('show');
+  const cv = $('scene');
+  cv.classList.toggle('pointer', !!(key || prop) && !(buildMode && prop));
+  cv.classList.toggle('move', !!(buildMode && prop));
+  const tip = $('tip'); tip.classList.remove('bad');
+  let text = '';
+  if (prop) { const p = getProp(prop); if (p) text = `${(p.label || catName(p.type)).toUpperCase()}${p.idea ? ' · IDEA' : ''}${p.app ? ' · APP' : ''}${buildMode ? ' · DRAG' : ''}`; }
+  else if (key === 'spine') text = mode === 'spine' ? VN[u.vert] : 'SPINE MODEL';
+  else if (key === 'bin') text = `BIN · ${S.bin.length}`;
+  else if (key) text = LABEL(key).toUpperCase();
+  if (text) { tip.textContent = text; tip.style.left = (T.px + 14) + 'px'; tip.style.top = (T.py + 14) + 'px'; tip.classList.add('show'); }
+  else tip.classList.remove('show');
 }
 function paintSpine() {
   if (!T) return;
-  T.vertMats.forEach((m, i) => m.color.setHex(i === selVert ? T.C.hi : (hoverVert === -2 || hoverVert === i) ? T.C.cyan : T.C.line));
+  T.vertMats.forEach((m, i) => m.color.setHex(i === selVert ? COL.hi : (hoverVert === -2 || hoverVert === i) ? COL.cyan : COL.line));
+}
+function paintProps() {
+  if (!T) return;
+  Object.entries(T.propObjs).forEach(([id, g]) => g.userData.lm.color.setHex(id === selProp ? COL.hi : id === hoverProp ? COL.cyan : COL.line));
 }
 function sceneClick() {
   doHover();
+  if (hoverProp) return selectProp(hoverProp);
   if (!hoverKey) return;
   if (hoverKey === 'spine') { if (mode !== 'spine') focus('spine'); else if (hoverVert >= 0) selectVert(hoverVert); }
   else focus(hoverKey);
@@ -926,32 +1182,192 @@ function sceneClick() {
 function updateViewOffset() {
   if (!T) return;
   const open = $('panel').classList.contains('show');
-  if (open && innerWidth > 900) T.camera.setViewOffset(innerWidth, innerHeight, 210, 0, innerWidth, innerHeight);
+  if (open && innerWidth > 900) T.camera.setViewOffset(innerWidth, innerHeight, 215, 0, innerWidth, innerHeight);
   else T.camera.clearViewOffset();
   T.camera.updateProjectionMatrix();
+}
+
+/* =================== PROPS: add / move / bin =================== */
+function buildPropObj(p) {
+  if (!T) return null;
+  const lm = newLine(); const g = new THREE.Group(); g.userData.lm = lm;
+  try { (BUILD[p.type] || BUILD.crate)(g, lm, p); } catch (e) { BUILD.crate(g, lm, p); }
+  g.position.set(p.x, p.y || 0, p.z); g.rotation.y = p.ry || 0; g.scale.setScalar(p.s || 1);
+  g.traverse(o => { if (o.isMesh) o.userData.prop = p.id; if (o.userData.anim) T.anims.push(o); });
+  T.scene.add(g); T.propObjs[p.id] = g; collectPropHot();
+  return g;
+}
+function collectPropHot() { T.propHot = []; Object.values(T.propObjs).forEach(g => g.traverse(o => { if (o.isMesh) T.propHot.push(o); })); }
+function syncProp(p) { const o = T && T.propObjs[p.id]; if (o) { o.position.set(p.x, p.y || 0, p.z); o.rotation.y = p.ry || 0; o.scale.setScalar(p.s || 1); } }
+const nearBin = p => Math.hypot(p.x - BIN.x, p.z - BIN.z) < 0.5;
+function setBinHot(on) { if (!T) return; T.binHot = on; T.binLm.color.setHex(on ? COL.red : COL.line); T.binG.scale.setScalar(on ? 1.18 : 1); }
+function freeSpot() {
+  for (let i = 0; i < 40; i++) {
+    const x = clamp(0.4 + (Math.random() - 0.5) * 2.4, -2.4, 2.4), z = clamp(0.5 + (Math.random() - 0.5) * 2.2, -0.4, 2.2);
+    if (Math.hypot(x - HOLO.x, z - HOLO.z) > 0.9 && Math.hypot(x - BIN.x, z - BIN.z) > 0.7 && S.props.every(p => Math.hypot(p.x - x, p.z - z) > 0.6)) return { x, z };
+  }
+  return { x: 0.9, z: 0.9 };
+}
+function addProp(type, extra) {
+  const spot = freeSpot();
+  const p = Object.assign({ id: uid('p'), type, x: spot.x, y: 0, z: spot.z, ry: 0, s: 1, label: catName(type) }, extra || {});
+  S.props.push(p); save();
+  const g = buildPropObj(p);
+  if (g) { g.scale.setScalar(0.01); T.grows.push({ obj: g, s: p.s || 1, t0: performance.now(), dur: 600 }); }
+  if (!buildMode) setBuild(true, true);
+  selectProp(p.id);
+  return p;
+}
+function fly(obj, done) {
+  if (!T) { if (done) done(); return; }
+  const from = obj.getWorldPosition(V3(0, 0, 0)); const s0 = V3(1, 1, 1); obj.getWorldScale(s0);
+  T.scene.attach(obj);
+  T.flights.push({ obj, from, to: V3(BIN.x, 0.42, BIN.z), s0, t0: performance.now(), dur: 750, done });
+}
+function flyPaper(fromObj) {
+  if (!T || !fromObj) return;
+  const b = cachedSolid('ball', M.line); fromObj.getWorldPosition(b.position); T.scene.add(b);
+  fly(b, () => disposeObj(b));
+}
+function pushBin(entry) {
+  entry.id = uid('b'); entry.at = Date.now(); S.bin.push(entry); S.bin = S.bin.slice(-50); save();
+  setTimeout(refreshBinBalls, 760);
+  if (mode === 'bin') renderPanel('bin'); if (mode === 'workshop') renderPanel('workshop');
+}
+function binProp(id) {
+  const i = S.props.findIndex(p => p.id === id); if (i < 0) return;
+  const p = S.props.splice(i, 1)[0];
+  pushBin({ kind: 'prop', label: p.label || catName(p.type), data: p });
+  const g = T && T.propObjs[id];
+  if (g) { delete T.propObjs[id]; collectPropHot(); fly(g, () => disposeObj(g)); }
+  if (selProp === id) { selProp = null; if (mode === 'item') { if (T) delete T.views.item; buildMode ? focus('workshop') : back(); } }
+  hoverProp = null; save();
+  if (mode === 'workshop') renderPanel('workshop');
+  subtitle(`${p.label || catName(p.type)} binned.`);
+}
+function refreshBinBalls() {
+  if (!T) return;
+  while (T.binBalls.children.length) T.binBalls.remove(T.binBalls.children[0]);
+  const n = Math.min(S.bin.length, 7);
+  for (let i = 0; i < n; i++) { const b = cachedSolid('ball', M.line); const a = i * 2.1; b.position.set(Math.cos(a) * 0.07, 0.3 + (i % 3) * 0.035, Math.sin(a) * 0.07); b.rotation.set(i, i * 2, 0); T.binBalls.add(b); }
+}
+function restoreBin(id) {
+  const i = S.bin.findIndex(b => b.id === id); if (i < 0) return;
+  const b = S.bin.splice(i, 1)[0];
+  if (b.kind === 'prop') {
+    const p = b.data; if (getProp(p.id)) p.id = uid('p');
+    if (Math.hypot(p.x - BIN.x, p.z - BIN.z) < 0.6) { p.x = BIN.x - 0.7; p.z = BIN.z + 0.5; }
+    S.props.push(p); const g = buildPropObj(p);
+    if (g) { g.scale.setScalar(0.01); T.grows.push({ obj: g, s: p.s || 1, t0: performance.now(), dur: 600 }); }
+  } else if (b.kind === 'idea') { S.ideas.push(b.data); S.holoSel = b.data.id; rebuildHolo(); }
+  else if (b.kind === 'task') { S.tasks.push(b.data); renderTasks(); }
+  save(); refreshBinBalls(); drawScreen('status');
+  subtitle(`${b.label} restored.`);
+}
+function emptyBin() { S.bin = []; save(); refreshBinBalls(); if (mode === 'bin') renderPanel('bin'); }
+function selectProp(id) {
+  selProp = id; paintProps();
+  if (T) {
+    if (!buildMode) {
+      const p = getProp(id), sc = p.s || 1;
+      const tgt = V3(p.x, (p.y || 0) + 0.45 * sc, p.z);
+      const dir = T.camera.position.clone().sub(tgt); dir.normalize(); dir.y = Math.max(dir.y, 0.35); dir.normalize();
+      T.views.item = { pos: tgt.clone().addScaledVector(dir, 1.6 + sc * 0.6), tgt };
+    } else delete T.views.item;
+  }
+  focus('item');
+}
+function setBuild(on, quiet) {
+  buildMode = !!on;
+  document.body.classList.toggle('building', buildMode);
+  $('buildBtn').classList.toggle('on', buildMode);
+  if (buildMode && T && T.views[mode] && mode !== 'item') focus('workshop');
+  if (buildMode && T && mode === 'item') delete T.views.item;
+  if (!buildMode) setBinHot(false);
+  updateHint();
+  if (mode === 'workshop') renderPanel('workshop');
+  if (!quiet) say(buildMode ? `Build mode engaged, ${S.name}. Drag things about; the bin takes anything you no longer want.` : 'Build mode disengaged.');
+}
+$('buildBtn').onclick = () => setBuild(!buildMode);
+$('shopBtn').onclick = () => focus('workshop');
+
+/* =================== HOLOGRAM TABLE =================== */
+function newIdea(tpl, title) {
+  const t = TEMPLATES[tpl] || TEMPLATES.blank;
+  const idea = { id: uid('i'), title: title || t.name, notes: '', parts: clone(t.parts) };
+  S.ideas.push(idea); S.holoSel = idea.id; selPart = 0; save(); rebuildHolo(); drawScreen('status');
+  return idea;
+}
+function rebuildHolo() {
+  if (!T) return;
+  const c = T.holoContent;
+  while (c.children.length) c.remove(c.children[0]);
+  const idea = curIdea();
+  if (!idea || !idea.parts.length) {
+    const g = new THREE.Group();
+    const t1 = cachedSolid('torus', M.holoLine, M.holoFill); t1.scale.setScalar(0.5); t1.position.y = 0.35; g.add(t1);
+    const t2 = cachedSolid('torus', M.holoLine, M.holoFill); t2.scale.setScalar(0.38); t2.position.y = 0.35; t2.rotation.y = Math.PI / 2; g.add(t2);
+    const core = cachedSolid('sphere', M.holoLine, M.holoFill); core.scale.setScalar(0.12); core.position.y = 0.35; g.add(core);
+    c.add(g); return;
+  }
+  const inner = new THREE.Group();
+  idea.parts.forEach((pt, i) => inner.add(partObj(pt, i === selPart && mode === 'holo' ? M.holoSel : M.holoLine, M.holoFill)));
+  inner.updateMatrixWorld(true);
+  const bb = new THREE.Box3().setFromObject(inner), size = V3(0, 0, 0), ctr = V3(0, 0, 0);
+  bb.getSize(size); bb.getCenter(ctr);
+  const s = 0.75 / Math.max(size.x, size.y, size.z, 0.05);
+  inner.scale.setScalar(s); inner.position.set(-ctr.x * s, -bb.min.y * s + 0.02, -ctr.z * s);
+  c.add(inner);
+}
+function binIdea() {
+  const idea = curIdea(); if (!idea) return;
+  S.ideas = S.ideas.filter(i => i.id !== idea.id);
+  pushBin({ kind: 'idea', label: idea.title, data: idea });
+  if (T && T.holoContent.children[0]) { const g = T.holoContent.children[0]; fly(g, () => { if (g.parent) g.parent.remove(g); }); }
+  S.holoSel = S.ideas.length ? S.ideas[S.ideas.length - 1].id : ''; selPart = 0; save();
+  setTimeout(rebuildHolo, 60); renderPanel('holo'); drawScreen('status');
+  subtitle(`${idea.title} binned.`);
+}
+function materialise() {
+  const idea = curIdea(); if (!idea || !idea.parts.length) return;
+  const p = addProp('custom', { parts: clone(idea.parts), idea: idea.id, label: idea.title, x: HOLO.x + 0.95, z: HOLO.z + 0.3 });
+  say(`${idea.title} materialised, ${S.name}.`);
+  return p;
 }
 
 /* =================== STATIONS / PANELS =================== */
 function focus(key) {
   if (key === 'settings') key = 'status';
-  mode = key;
+  const prev = mode; mode = key;
+  if (key !== 'item' && selProp) { selProp = null; paintProps(); if (T) delete T.views.item; }
   $('panel').classList.add('show'); document.body.classList.add('panel-open');
   $('pTitle').textContent = LABEL(key);
   renderPanel(key); updateViewOffset(); updateHint();
+  if ((prev === 'holo') !== (key === 'holo')) rebuildHolo();
   if (T) T.needHover = true;
 }
 function back() {
-  mode = 'overview';
+  const prev = mode; mode = 'overview';
+  selProp = null; paintProps(); if (T) delete T.views.item;
   $('panel').classList.remove('show'); document.body.classList.remove('panel-open');
   updateViewOffset(); updateHint(); paintSpine();
+  if (prev === 'holo') rebuildHolo();
 }
 $('pClose').onclick = back;
 $('sysBtn').onclick = () => focus('status');
 document.querySelectorAll('.station').forEach(b => b.onclick = () => focus(b.dataset.k));
 function updateHint() {
   $('hint').textContent = document.body.classList.contains('lite') ? '' :
-    mode === 'overview' ? 'DRAG TO LOOK · SCROLL TO ZOOM · CLICK A SCREEN' :
+    buildMode ? 'BUILD MODE · DRAG ITEMS TO MOVE · DROP ON THE BIN TO DISCARD · R ROTATES · B EXITS' :
+    mode === 'overview' ? 'DRAG TO LOOK · SCROLL TO ZOOM · CLICK A SCREEN OR ANY ITEM' :
     mode === 'spine' ? 'DRAG TO ROTATE · CLICK A VERTEBRA · ESC TO STEP BACK' : 'ESC OR ✕ TO STEP BACK';
+}
+const slider = (id, label, val, min, max, step, unit) =>
+  `<div class="sld"><label>${label}<span id="${id}V" data-unit="${unit || ''}">${(+val).toFixed(step < 1 ? 2 : 0)}${unit || ''}</span></label><input type="range" id="${id}" min="${min}" max="${max}" step="${step}" value="${val}"></div>`;
+function bindSlider(id, fn, step) {
+  const el = $(id); if (!el) return;
+  el.oninput = () => { const v = +el.value, lab = $(id + 'V'); lab.textContent = v.toFixed(step < 1 ? 2 : 0) + lab.dataset.unit; fn(v); };
+  el.onchange = save;
 }
 
 function renderPanel(key) {
@@ -961,7 +1377,8 @@ function renderPanel(key) {
       <p class="hint">Click an app to open it. ↗ opens it in its own tab, ✎ edits, ✕ removes.</p>`;
     $('addApp').onclick = () => editApp(null); renderAppsList();
   } else if (key === 'tasks') {
-    b.innerHTML = `<div class="addrow"><input id="taskIn" placeholder="Add a task, press Enter"><button id="taskAdd">+</button></div><ul class="tasks" id="tasks"></ul>`;
+    b.innerHTML = `<div class="addrow"><input id="taskIn" placeholder="Add a task, press Enter"><button id="taskAdd">+</button></div><ul class="tasks" id="tasks"></ul>
+      <p class="hint">✕ throws a task into the bin, so you can restore it later.</p>`;
     $('taskAdd').onclick = () => { const v = $('taskIn').value.trim(); if (v) { addTask(v); $('taskIn').value = ''; $('taskIn').focus(); } };
     $('taskIn').onkeydown = e => { if (e.key === 'Enter') $('taskAdd').click(); };
     renderTasks(); setTimeout(() => $('taskIn') && $('taskIn').focus(), 350);
@@ -992,38 +1409,168 @@ function renderPanel(key) {
       ${REGIONS.map(r => `<div class="reg"><div class="rl">${r.name}</div><div class="chips">${r.idx.map(i => `<button data-v="${i}" class="${i === selVert ? 'on' : ''}">${VN[i]}</button>`).join('')}</div></div>`).join('')}
       <p class="hint">Drag the model to rotate it. Or say "${pName()}, show C5".</p>`;
     b.querySelectorAll('[data-v]').forEach(x => x.onclick = () => selectVert(+x.dataset.v));
-  } else if (key === 'status') {
-    const modelOpts = [...new Set([...models, S.ollama.model].filter(Boolean))];
-    b.innerHTML = `
-      <div class="sec"><div class="sl">Address</div><input id="sName" value="${esc(S.name)}"></div>
-      <div class="sec"><div class="sl">Voices</div>
-        <label>Nate</label><div class="row"><select id="vNate"></select><button data-test="nate" title="Preview">▶</button></div>
-        <label>Nat</label><div class="row"><select id="vNat"></select><button data-test="nat" title="Preview">▶</button></div>
-        <label class="chk"><input type="checkbox" id="speakT" ${S.speak ? 'checked' : ''}> Read replies aloud</label>
-        <p class="hint">Your choice and the last persona you used are remembered between launches.</p></div>
-      <div class="sec"><div class="sl">Ollama</div>
-        <label>Address</label><div class="row"><input id="oUrl" value="${esc(S.ollama.url)}"><button id="oTest">Test</button></div>
-        <p class="hint" id="oMsg">${esc(ollamaMsg)}</p>
-        <label>Model</label><select id="oModel">${modelOpts.length ? modelOpts.map(m => `<option ${m === S.ollama.model ? 'selected' : ''}>${esc(m)}</option>`).join('') : '<option value="">None found yet. Press Test</option>'}</select>
-        <p class="hint">This page's address is <code>${esc(location.origin)}</code>. Ollama must be told to allow it.</p></div>
-      <div class="sec"><div class="sl">Display</div><label class="chk"><input type="checkbox" id="liteT" ${S.lite ? 'checked' : ''}> Lite mode (no 3D room)</label></div>
-      <div class="sec"><div class="sl">Backup</div><div class="row"><button id="exportBtn">Export</button><button id="importBtn">Import</button>
-        <input type="file" id="importFile" accept="application/json" hidden></div></div>
-      <div class="sec"><div class="sl">Voice commands</div><p class="hint">Press 🎙, then: "Nate, open Odonta" · "Nat, add task call the landlord" · "Nate, start focus" · "Nat, stop" · "Nate, brief me" · "Nat, show L5" · "Nate, go home" · anything else goes to Ollama.</p></div>`;
-    fillVoiceSelects();
-    $('sName').onchange = () => { S.name = $('sName').value.trim() || 'sir'; save(); refreshScreens(); };
-    b.querySelectorAll('[data-test]').forEach(x => x.onclick = () => { const p = x.dataset.test; say(`${pName(p)} here, ${S.name}. All systems nominal.`, p); });
-    $('vNate').onchange = () => { S.voices.nate = $('vNate').value; save(); say(`Nate here, ${S.name}.`, 'nate'); };
-    $('vNat').onchange = () => { S.voices.nat = $('vNat').value; save(); say(`Nat here, ${S.name}.`, 'nat'); };
-    $('speakT').onchange = () => { S.speak = $('speakT').checked; save(); };
-    $('oUrl').onchange = () => { S.ollama.url = $('oUrl').value.trim() || defaults.ollama.url; save(); };
-    $('oTest').onclick = () => { S.ollama.url = $('oUrl').value.trim() || defaults.ollama.url; save(); testOllama(false); };
-    $('oModel').onchange = () => { S.ollama.model = $('oModel').value; save(); setChip(chipState); };
-    $('liteT').onchange = () => { S.lite = $('liteT').checked; save(); applyLite(); };
-    $('exportBtn').onclick = exportBackup;
-    $('importBtn').onclick = () => $('importFile').click();
-    $('importFile').onchange = importBackup;
+  } else if (key === 'status') renderSystems(b);
+  else if (key === 'workshop') renderWorkshop(b);
+  else if (key === 'item') renderItem(b);
+  else if (key === 'holo') renderHoloPanel(b);
+  else if (key === 'bin') renderBin(b);
+}
+
+function renderWorkshop(b) {
+  const designs = S.ideas.filter(i => i.parts && i.parts.length);
+  b.innerHTML = `
+    <div class="sec"><button id="buildT" class="big-btn wide ${buildMode ? 'on' : ''}">🛠 BUILD MODE · ${buildMode ? 'ON' : 'OFF'}</button>
+      <p class="hint">In build mode, drag any item to move it and drop it on the bin to discard it. Click an item to rotate, resize or link it. Press B to toggle.</p></div>
+    <div class="sec"><div class="sl">Add furniture</div><div class="cat">${CATALOG.map(c => `<button data-add="${c.type}"><b>${c.icon}</b>${c.name}</button>`).join('')}</div></div>
+    <div class="sec"><div class="sl">Your designs</div>
+      ${designs.length ? `<div class="list">${designs.map(i => `<div class="li"><span class="t">${esc(i.title)}<small>${i.parts.length} part${i.parts.length > 1 ? 's' : ''}</small></span><button data-place="${i.id}">Place</button><button data-holo="${i.id}">Edit</button></div>`).join('')}</div>`
+        : `<p class="hint">Design something on the hologram table, then materialise it into the room.</p>`}
+      <button id="goHolo">◎ Open hologram table</button></div>
+    <div class="sec"><div class="sl">In the room · ${S.props.length}</div>
+      <div class="list">${S.props.map(p => `<div class="li"><span class="t">${esc(p.label || catName(p.type))}<small>${esc(catName(p.type))}${p.idea ? ' · idea' : ''}</small></span><button data-sel="${p.id}">Edit</button><button class="danger" data-binp="${p.id}" title="Throw in bin">🗑</button></div>`).join('') || '<p class="hint">The room is bare.</p>'}</div></div>
+    <div class="sec"><div class="row"><button id="openBin">🗑 Bin · ${S.bin.length}</button><button id="resetRoom" class="danger">Reset layout</button></div></div>`;
+  $('buildT').onclick = () => setBuild(!buildMode);
+  b.querySelectorAll('[data-add]').forEach(x => x.onclick = () => { const p = addProp(x.dataset.add); subtitle(`${p.label} placed. Drag it where you like.`); });
+  b.querySelectorAll('[data-place]').forEach(x => x.onclick = () => { S.holoSel = x.dataset.place; materialise(); });
+  b.querySelectorAll('[data-holo]').forEach(x => x.onclick = () => { S.holoSel = x.dataset.holo; selPart = 0; save(); focus('holo'); });
+  b.querySelectorAll('[data-sel]').forEach(x => x.onclick = () => selectProp(x.dataset.sel));
+  b.querySelectorAll('[data-binp]').forEach(x => x.onclick = () => binProp(x.dataset.binp));
+  $('goHolo').onclick = () => focus('holo');
+  $('openBin').onclick = () => focus('bin');
+  $('resetRoom').onclick = () => {
+    if (!confirm('Put the room back to the default layout? Items you added will be removed (not binned).')) return;
+    if (T) { Object.values(T.propObjs).forEach(disposeObj); T.propObjs = {}; }
+    S.props = DEFAULT_PROPS(); save(); if (T) S.props.forEach(buildPropObj);
+    renderPanel('workshop');
+  };
+}
+function renderItem(b) {
+  const p = getProp(selProp); if (!p) { b.innerHTML = '<p class="hint">That item is gone.</p>'; return; }
+  const deg = Math.round(((p.ry || 0) * 180 / Math.PI % 360 + 360) % 360);
+  const idea = S.ideas.find(i => i.id === p.idea);
+  b.innerHTML = `
+    <div class="sec"><div class="sl">Item · ${esc(catName(p.type))}</div><input id="iName" value="${esc(p.label || '')}"></div>
+    <div class="sec"><div class="sl">Placement</div>
+      ${slider('iRot', 'Rotate', deg, 0, 355, 5, '°')}
+      ${slider('iScale', 'Size', p.s || 1, 0.3, 2.5, 0.05, '×')}
+      ${slider('iY', 'Height off floor', p.y || 0, 0, 2.2, 0.01, ' m')}
+      <div class="row"><button id="iFloor">Drop to floor</button><button id="iDup">Duplicate</button></div>
+      ${buildMode ? '<p class="hint">Drag it in the room to move it. R rotates.</p>' : '<p class="hint">Turn on build mode (🛠 or B) to drag it around.</p>'}</div>
+    <div class="sec"><div class="sl">Linked idea</div>
+      <select id="iIdea"><option value="">None</option>${S.ideas.map(i => `<option value="${i.id}" ${i.id === p.idea ? 'selected' : ''}>${esc(i.title)}</option>`).join('')}<option value="__new">+ New idea from this item</option></select>
+      <textarea id="iNote" class="small" placeholder="Notes for this item: what it's for, what it reminds you of…">${esc(p.note || '')}</textarea>
+      ${idea ? `<button id="iOpenIdea">◎ Open "${esc(idea.title)}" on the hologram table</button>` : ''}</div>
+    <div class="sec"><div class="sl">Linked app</div>
+      <div class="row"><select id="iApp" style="flex:1"><option value="">None</option>${S.apps.map(a => `<option value="${a.id}" ${a.id === p.app ? 'selected' : ''}>${esc(a.name)}</option>`).join('')}</select>
+      ${p.app ? '<button id="iOpenApp" style="flex:none">Open</button>' : ''}</div></div>
+    <div class="sec"><button id="iBin" class="danger wide">🗑 Throw in bin</button></div>`;
+  const live = () => { syncProp(p); saveSoon(); };
+  $('iName').oninput = () => { p.label = $('iName').value; $('pTitle').textContent = p.label || 'Item'; saveSoon(); };
+  bindSlider('iRot', v => { p.ry = v * Math.PI / 180; live(); }, 5);
+  bindSlider('iScale', v => { p.s = v; live(); }, 0.05);
+  bindSlider('iY', v => { p.y = v; live(); }, 0.01);
+  $('iFloor').onclick = () => { p.y = 0; syncProp(p); save(); renderPanel('item'); };
+  $('iDup').onclick = () => { const q = clone(p); q.id = uid('p'); q.x = clamp(p.x + 0.4, -2.85, 2.85); q.z = clamp(p.z + 0.3, -2.4, 2.4); S.props.push(q); buildPropObj(q); save(); selectProp(q.id); };
+  $('iIdea').onchange = () => {
+    const v = $('iIdea').value;
+    if (v === '__new') {
+      const i = newIdea('blank', `${p.label || catName(p.type)} idea`);
+      if (p.type === 'custom' && p.parts) { i.parts = clone(p.parts); rebuildHolo(); }
+      i.notes = p.note || ''; p.idea = i.id;
+    } else p.idea = v;
+    save(); renderPanel('item');
+  };
+  $('iNote').oninput = () => { p.note = $('iNote').value; saveSoon(); };
+  if ($('iOpenIdea')) $('iOpenIdea').onclick = () => { S.holoSel = p.idea; selPart = 0; save(); focus('holo'); };
+  $('iApp').onchange = () => { p.app = $('iApp').value; save(); renderPanel('item'); };
+  if ($('iOpenApp')) $('iOpenApp').onclick = () => { const a = S.apps.find(a => a.id === p.app); if (a) openApp(a); };
+  $('iBin').onclick = () => binProp(p.id);
+}
+function renderHoloPanel(b) {
+  const idea = curIdea();
+  if (idea && selPart >= idea.parts.length) selPart = Math.max(0, idea.parts.length - 1);
+  const pt = idea && idea.parts[selPart];
+  const linked = idea ? S.props.filter(p => p.idea === idea.id) : [];
+  b.innerHTML = `
+    <div class="sec"><div class="sl">Ideas</div>
+      <div class="chips">${S.ideas.map(i => `<button data-idea="${i.id}" class="${i.id === S.holoSel ? 'on' : ''}">${esc(i.title)}</button>`).join('') || '<span class="hint">No ideas yet.</span>'}</div>
+      <div class="row"><select id="hTpl" style="flex:1">${Object.entries(TEMPLATES).map(([k, t]) => `<option value="${k}">${k === 'blank' ? 'Blank' : 'Start from: ' + t.name}</option>`).join('')}</select><button id="hNew" style="flex:none">+ New idea</button></div></div>
+    ${idea ? `
+    <div class="sec"><div class="sl">Idea</div>
+      <input id="hTitle" value="${esc(idea.title)}">
+      <textarea id="hNotes" class="small" placeholder="What is it for? Measurements, materials, next steps…">${esc(idea.notes || '')}</textarea>
+      ${linked.length ? `<p class="hint">Linked to: ${linked.map(p => esc(p.label || catName(p.type))).join(', ')}</p>` : ''}</div>
+    <div class="sec"><div class="sl">Shape · ${idea.parts.length} part${idea.parts.length === 1 ? '' : 's'}</div>
+      <div class="chips">${idea.parts.map((q, i) => `<button data-part="${i}" class="${i === selPart ? 'on' : ''}">${PART_NAMES[q.t] || q.t} ${i + 1}</button>`).join('')}</div>
+      <div class="chips">${Object.entries(PART_NAMES).map(([k, n]) => `<button data-addpart="${k}">+ ${n}</button>`).join('')}</div>
+      ${pt ? `<div class="grid2">
+        ${slider('hx', 'Left / right', pt.x, -1, 1, 0.01, ' m')}${slider('hw', 'Width', pt.w, 0.02, 2, 0.01, ' m')}
+        ${slider('hy', 'Height', pt.y, 0, 2, 0.01, ' m')}${slider('hh', 'Tall', pt.h, 0.02, 2, 0.01, ' m')}
+        ${slider('hz', 'Front / back', pt.z, -1, 1, 0.01, ' m')}${slider('hd', 'Depth', pt.d, 0.02, 2, 0.01, ' m')}
+      </div>${slider('hr', 'Turn', pt.r || 0, 0, 355, 5, '°')}
+      <div class="row"><button id="hDupPart">Duplicate part</button><button id="hDelPart" class="danger">Remove part</button></div>` : ''}</div>
+    <div class="sec"><button id="hMat" class="big-btn on wide">⤓ MATERIALISE IN THE ROOM</button><button id="hBin" class="danger wide">🗑 Throw idea in bin</button></div>`
+    : `<p class="hint">Start an idea from a template or a blank block. Shape it here, then materialise it as furniture, or just keep it as a note.</p>`}`;
+  b.querySelectorAll('[data-idea]').forEach(x => x.onclick = () => { S.holoSel = x.dataset.idea; selPart = 0; save(); rebuildHolo(); renderPanel('holo'); });
+  $('hNew').onclick = () => { newIdea($('hTpl').value); renderPanel('holo'); };
+  if (!idea) return;
+  $('hTitle').oninput = () => { idea.title = $('hTitle').value || 'Untitled'; saveSoon(); };
+  $('hTitle').onchange = () => renderPanel('holo');
+  $('hNotes').oninput = () => { idea.notes = $('hNotes').value; saveSoon(); };
+  b.querySelectorAll('[data-part]').forEach(x => x.onclick = () => { selPart = +x.dataset.part; rebuildHolo(); renderPanel('holo'); });
+  b.querySelectorAll('[data-addpart]').forEach(x => x.onclick = () => {
+    idea.parts.push({ t: x.dataset.addpart, x: 0, y: 0.15, z: 0, w: 0.3, h: 0.3, d: 0.3, r: 0 });
+    selPart = idea.parts.length - 1; save(); rebuildHolo(); renderPanel('holo');
+  });
+  if (pt) {
+    [['hx', 'x'], ['hy', 'y'], ['hz', 'z'], ['hw', 'w'], ['hh', 'h'], ['hd', 'd'], ['hr', 'r']].forEach(([id, k]) => bindSlider(id, v => { pt[k] = v; rebuildHolo(); saveSoon(); }, k === 'r' ? 5 : 0.01));
+    $('hDupPart').onclick = () => { const q = clone(pt); q.x = clamp(q.x + 0.1, -1, 1); idea.parts.push(q); selPart = idea.parts.length - 1; save(); rebuildHolo(); renderPanel('holo'); };
+    $('hDelPart').onclick = () => { idea.parts.splice(selPart, 1); selPart = Math.max(0, selPart - 1); save(); rebuildHolo(); renderPanel('holo'); };
   }
+  $('hMat').onclick = () => { if (!idea.parts.length) return say(`There's nothing to build yet, ${S.name}. Add a part first.`); materialise(); };
+  $('hBin').onclick = binIdea;
+}
+function renderBin(b) {
+  const icon = k => k === 'prop' ? '🪑' : k === 'idea' ? '◎' : '✓';
+  const ago = t => { const m = Math.round((Date.now() - t) / 60000); return m < 1 ? 'just now' : m < 60 ? `${m} min ago` : m < 1440 ? `${Math.round(m / 60)} h ago` : `${Math.round(m / 1440)} d ago`; };
+  b.innerHTML = `${S.bin.length ? `<div class="list">${[...S.bin].reverse().map(x => `<div class="li"><span>${icon(x.kind)}</span><span class="t">${esc(x.label)}<small>${x.kind} · ${ago(x.at)}</small></span><button data-res="${x.id}">Restore</button><button class="danger" data-kill="${x.id}" title="Delete for good">✕</button></div>`).join('')}</div>
+    <button id="emptyBin" class="danger">Empty bin</button>` : '<p class="hint">The bin is empty. Drop furniture on it in build mode, or bin ideas and tasks.</p>'}
+    <p class="hint">The bin keeps the last 50 things you throw away.</p>`;
+  b.querySelectorAll('[data-res]').forEach(x => x.onclick = () => { restoreBin(x.dataset.res); renderPanel('bin'); });
+  b.querySelectorAll('[data-kill]').forEach(x => x.onclick = () => { S.bin = S.bin.filter(y => y.id !== x.dataset.kill); save(); refreshBinBalls(); renderPanel('bin'); });
+  if ($('emptyBin')) $('emptyBin').onclick = () => { if (confirm('Empty the bin for good?')) emptyBin(); };
+}
+function renderSystems(b) {
+  const modelOpts = [...new Set([...models, S.ollama.model].filter(Boolean))];
+  b.innerHTML = `
+    <div class="sec"><div class="sl">Address</div><input id="sName" value="${esc(S.name)}"></div>
+    <div class="sec"><div class="sl">Voices</div>
+      <label>Nate</label><div class="row"><select id="vNate" style="flex:1"></select><button data-test="nate" title="Preview" style="flex:none">▶</button></div>
+      <label>Nat</label><div class="row"><select id="vNat" style="flex:1"></select><button data-test="nat" title="Preview" style="flex:none">▶</button></div>
+      <label class="chk"><input type="checkbox" id="speakT" ${S.speak ? 'checked' : ''}> Read replies aloud</label>
+      <p class="hint">Your choice and the last persona you used are remembered between launches.</p></div>
+    <div class="sec"><div class="sl">Ollama</div>
+      <label>Address</label><div class="row"><input id="oUrl" value="${esc(S.ollama.url)}" style="flex:1"><button id="oTest" style="flex:none">Test</button></div>
+      <p class="hint" id="oMsg">${esc(ollamaMsg)}</p>
+      <label>Model</label><select id="oModel">${modelOpts.length ? modelOpts.map(m => `<option ${m === S.ollama.model ? 'selected' : ''}>${esc(m)}</option>`).join('') : '<option value="">None found yet. Press Test</option>'}</select>
+      <p class="hint">This page's address is <code>${esc(location.origin)}</code>. Ollama must be told to allow it.</p></div>
+    <div class="sec"><div class="sl">Display</div><label class="chk"><input type="checkbox" id="liteT" ${S.lite ? 'checked' : ''}> Lite mode (no 3D room)</label></div>
+    <div class="sec"><div class="sl">Backup</div><div class="row"><button id="exportBtn">Export</button><button id="importBtn">Import</button>
+      <input type="file" id="importFile" accept="application/json" hidden></div></div>
+    <div class="sec"><div class="sl">Voice commands</div><p class="hint">Press 🎙, then: "Nate, open Odonta" · "Nat, add task call the landlord" · "Nate, start focus" · "Nat, show L5" · "Nate, add a server rack" · "Nat, new idea called desk shelf" · "Nate, build mode" · "Nat, empty the bin" · anything else goes to Ollama.</p></div>`;
+  fillVoiceSelects();
+  $('sName').onchange = () => { S.name = $('sName').value.trim() || 'sir'; save(); refreshScreens(); };
+  b.querySelectorAll('[data-test]').forEach(x => x.onclick = () => { const p = x.dataset.test; say(`${pName(p)} here, ${S.name}. All systems nominal.`, p); });
+  $('vNate').onchange = () => { S.voices.nate = $('vNate').value; save(); say(`Nate here, ${S.name}.`, 'nate'); };
+  $('vNat').onchange = () => { S.voices.nat = $('vNat').value; save(); say(`Nat here, ${S.name}.`, 'nat'); };
+  $('speakT').onchange = () => { S.speak = $('speakT').checked; save(); };
+  $('oUrl').onchange = () => { S.ollama.url = $('oUrl').value.trim() || defaults.ollama.url; save(); };
+  $('oTest').onclick = () => { S.ollama.url = $('oUrl').value.trim() || defaults.ollama.url; save(); testOllama(false); };
+  $('oModel').onchange = () => { S.ollama.model = $('oModel').value; save(); setChip(chipState); };
+  $('liteT').onchange = () => { S.lite = $('liteT').checked; save(); applyLite(); };
+  $('exportBtn').onclick = exportBackup;
+  $('importBtn').onclick = () => $('importFile').click();
+  $('importFile').onchange = importBackup;
 }
 function fillVoiceSelects() {
   ['nate', 'nat'].forEach(p => {
@@ -1087,9 +1634,12 @@ function renderTasks() {
   ul.innerHTML = '';
   S.tasks.forEach(t => {
     const li = document.createElement('li'); if (t.done) li.className = 'done';
-    li.innerHTML = `<input type="checkbox" ${t.done ? 'checked' : ''}><span>${esc(t.text)}</span><button class="del" title="Delete">✕</button>`;
+    li.innerHTML = `<input type="checkbox" ${t.done ? 'checked' : ''}><span>${esc(t.text)}</span><button class="del" title="Throw in bin">✕</button>`;
     li.querySelector('input').onchange = e => { t.done = e.target.checked; save(); renderTasks(); };
-    li.querySelector('.del').onclick = () => { S.tasks = S.tasks.filter(x => x !== t); save(); renderTasks(); };
+    li.querySelector('.del').onclick = () => {
+      S.tasks = S.tasks.filter(x => x !== t); pushBin({ kind: 'task', label: t.text, data: t }); save(); renderTasks();
+      if (T) flyPaper(T.screensAt.tasks);
+    };
     ul.appendChild(li);
   });
   if (!S.tasks.length) ul.innerHTML = '<li style="background:none;color:var(--dim)">Nothing yet.</li>';
@@ -1149,8 +1699,11 @@ function exportBackup() {
 function importBackup(e) {
   const f = e.target.files[0]; if (!f) return;
   f.text().then(t => {
-    try { S = merge(JSON.parse(t)); save(); setPersona(S.persona); refreshScreens(); if (mode !== 'overview') renderPanel(mode); say('Backup restored.'); }
-    catch (err) { alert('That file is not a Nomad backup.'); }
+    try {
+      S = merge(JSON.parse(t)); save(); setPersona(S.persona); refreshScreens();
+      if (T) { Object.values(T.propObjs).forEach(disposeObj); T.propObjs = {}; S.props.forEach(buildPropObj); refreshBinBalls(); rebuildHolo(); }
+      if (mode !== 'overview') renderPanel(mode); say('Backup restored.');
+    } catch (err) { alert('That file is not a Nomad backup.'); }
   });
 }
 
@@ -1171,8 +1724,16 @@ document.addEventListener('keydown', e => {
     if ($('appModal').classList.contains('show')) return $('appModal').classList.remove('show');
     if ($('appView').classList.contains('show')) return closeApp();
     if (typing) return document.activeElement.blur();
-    if (mode !== 'overview') back();
-  } else if (e.key === '/' && !typing) { e.preventDefault(); $('cmdIn').focus(); }
+    if (mode !== 'overview') back(); else if (buildMode) setBuild(false);
+    return;
+  }
+  if (typing) return;
+  if (e.key === '/') { e.preventDefault(); $('cmdIn').focus(); }
+  else if (e.key === 'b' || e.key === 'B') setBuild(!buildMode);
+  else if ((e.key === 'r' || e.key === 'R') && selProp) {
+    const p = getProp(selProp); if (!p) return;
+    p.ry = (p.ry || 0) + (e.shiftKey ? -1 : 1) * Math.PI / 12; syncProp(p); save(); if (mode === 'item') renderPanel('item');
+  } else if ((e.key === 'Delete' || e.key === 'Backspace') && selProp && buildMode) { e.preventDefault(); binProp(selProp); }
 });
 
 /* ---- clock ---- */
